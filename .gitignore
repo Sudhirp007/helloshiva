@@ -1,0 +1,46 @@
+# Security & Credentials (CRITICAL: Never commit keys or secrets)
+*.key
+*.pub
+secret/
+*.pem
+*.env
+*.env.*
+!.env.example
+
+# Operating System & Screenshots
+*.png
+*.jpg
+*.jpeg
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# Node & Frontend dependencies & builds
+node_modules/
+.next/
+out/
+build/
+dist/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Python & Backend
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+*.sqlite3
+*.db
+
+# Temporary & Editor
+.vscode/
+.idea/
+*.swp
+*.swo
