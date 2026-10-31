@@ -24,6 +24,11 @@ export default function Header() {
     setIsOpen(false);
   }, [pathname]);
 
+  // Do not render the public site header inside admin routes (prevents overlap)
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -77,6 +82,12 @@ export default function Header() {
             >
               <Sparkles className="w-3.5 h-3.5 text-[#8067FF]" />
               Free Tools (10)
+            </Link>
+            <Link
+              href="/login"
+              className="px-3 py-2 rounded-lg text-xs font-semibold text-[#C6C9DC] hover:text-white hover:bg-white/5 transition-colors"
+            >
+              Client Portal
             </Link>
             <Link
               href="/contact"

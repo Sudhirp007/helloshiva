@@ -1,122 +1,154 @@
 import React from "react";
 import Link from "next/link";
-import { ArrowRight, BookOpen, Calendar, Clock, Sparkles } from "lucide-react";
+import { ArrowRight, BookOpen, Calendar, Clock, Sparkles, User, Tag } from "lucide-react";
+import db from "@/lib/db";
+
+export const dynamic = "force-dynamic";
 
 export const metadata = {
-  title: "Marketing Insights & Technical Guides",
+  title: "Marketing Insights & Technical Strategy Guides",
   description:
-    "In-depth guides on SEO architecture, Core Web Vitals, attribution tracking, and commercial digital marketing strategy by HelloShiva.",
+    "Actionable technical guides on SEO architecture, Core Web Vitals, attribution tracking, and commercial growth strategy by HelloShiva engineers.",
 };
 
-const articles = [
-  {
-    slug: "technical-seo-prerequisite",
-    title: "Why Technical SEO is the Non-Negotiable Foundation for Content Success",
-    excerpt:
-      "Publishing great articles is useless if search engines face DOM rendering bottlenecks, indexing directives confusion, or crawl budget waste. Here is how to fix code-level SEO first.",
-    date: "October 2026",
-    readTime: "6 min read",
-    category: "Technical SEO",
-    toolLink: { name: "SEO Page Analyzer", href: "/tools/seo-page-analyzer" },
-  },
-  {
-    slug: "utm-parameters-pipeline-attribution",
-    title: "Mastering UTM Parameters: How to Connect Ad Clicks to Real Revenue",
-    excerpt:
-      "Most marketing teams use messy, unstandardized tracking links that break Google Analytics attribution. Learn how to build a unified campaign naming architecture.",
-    date: "October 2026",
-    readTime: "5 min read",
-    category: "Attribution & Ads",
-    toolLink: { name: "UTM Link Builder", href: "/tools/utm-builder" },
-  },
-  {
-    slug: "core-web-vitals-inp-guide",
-    title: "Core Web Vitals & INP: Why Page Responsiveness Directly Affects Conversions",
-    excerpt:
-      "Google's Interaction to Next Paint (INP) metric penalizes websites with bloated main-thread JavaScript execution. Discover how to optimize interaction latency.",
-    date: "October 2026",
-    readTime: "7 min read",
-    category: "Web Engineering",
-    toolLink: { name: "Heading Structure Checker", href: "/tools/heading-checker" },
-  },
-  {
-    slug: "robots-txt-common-disasters",
-    title: "Robots.txt vs. Access Control: How Accidental Disallows Destroy Organic Rankings",
-    excerpt:
-      "Robots.txt is not an access control mechanism. We unpack common staging-to-production mistakes and how to test user-agent directives properly.",
-    date: "October 2026",
-    readTime: "4 min read",
-    category: "Crawl Architecture",
-    toolLink: { name: "Robots.txt Tester", href: "/tools/robots-txt-tester" },
-  },
-];
+export default async function BlogPage() {
+  // Fetch published articles from database
+  let articles: any[] = [];
+  try {
+    articles = db.prepare("SELECT * FROM articles WHERE status = 'PUBLISHED' ORDER BY updated_at DESC").all();
+  } catch (e) {
+    console.error("Failed to fetch articles:", e);
+  }
 
-export default function BlogPage() {
   return (
-    <div className="pt-28 pb-20 bg-light-section">
+    <div className="pt-28 pb-24 bg-light-section min-h-screen">
+      {/* Hero Header */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
         <div className="max-w-3xl mx-auto text-center space-y-4">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#E8E7FF] text-[#6366F1]">
             <BookOpen className="w-3.5 h-3.5" />
-            Knowledge & Strategy
+            Knowledge & Strategy Hub
           </div>
           <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight text-[#10183A]">
             Actionable Marketing Insights & Engineering Guides
           </h1>
           <p className="text-base sm:text-lg text-[#626985] leading-relaxed">
-            Deep technical teardowns, attribution frameworks, and search engine mechanics published by our strategy team.
+            In-depth architectural teardowns, search engine mechanics, and high-converting performance frameworks published by HelloShiva&apos;s senior growth engineers.
           </p>
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 mb-24">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          {articles.map((art, idx) => (
-            <div
-              key={idx}
-              className="bg-white rounded-3xl border border-[#E6E7F0] p-8 shadow-sm hover:border-[#6366F1]/50 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 flex flex-col justify-between"
+      {/* Articles Grid */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        {articles.length === 0 ? (
+          <div className="bg-white rounded-3xl border border-[#E6E7F0] p-12 text-center space-y-4">
+            <Sparkles className="w-8 h-8 text-[#6366F1] mx-auto" />
+            <h2 className="text-lg font-bold text-[#10183A]">New Insights In Progress</h2>
+            <p className="text-sm text-[#626985] max-w-md mx-auto">
+              Our engineering team is finalizing technical breakdowns. Check back shortly or explore our free marketing tools.
+            </p>
+            <Link
+              href="/tools"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-[#6366F1] to-[#8067FF]"
             >
-              <div>
-                <div className="flex items-center justify-between text-xs text-[#626985] mb-4">
-                  <span className="font-semibold text-[#6366F1] bg-[#F5F4FF] px-2.5 py-1 rounded-md border border-[#E8E7FF]">
-                    {art.category}
-                  </span>
-                  <div className="flex items-center gap-3">
-                    <span className="flex items-center gap-1">
-                      <Calendar className="w-3.5 h-3.5" /> {art.date}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Clock className="w-3.5 h-3.5" /> {art.readTime}
-                    </span>
+              <span>Explore 10 Free Marketing Tools</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {articles.map((art) => {
+              const words = (art.content_markdown || "").trim().split(/\s+/).filter(Boolean).length;
+              const readTime = Math.max(1, Math.ceil(words / 225));
+              const dateStr = art.published_at
+                ? new Date(art.published_at).toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                  })
+                : "October 2026";
+
+              return (
+                <article
+                  key={art.id}
+                  className="bg-white rounded-3xl border border-[#E6E7F0] p-8 shadow-sm hover:border-[#6366F1]/50 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 flex flex-col justify-between group"
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between text-xs text-[#626985]">
+                      <span className="font-semibold text-[#6366F1] bg-[#F5F4FF] px-3 py-1 rounded-full border border-[#E8E7FF]">
+                        {art.category || "Technical SEO"}
+                      </span>
+                      <div className="flex items-center gap-3">
+                        <span className="flex items-center gap-1">
+                          <Calendar className="w-3.5 h-3.5" /> {dateStr}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock className="w-3.5 h-3.5" /> {readTime} min read
+                        </span>
+                      </div>
+                    </div>
+
+                    <Link href={`/blog/${art.slug}`}>
+                      <h2 className="text-xl sm:text-2xl font-bold text-[#10183A] leading-snug group-hover:text-[#6366F1] transition-colors">
+                        {art.title}
+                      </h2>
+                    </Link>
+
+                    <p className="text-xs sm:text-sm text-[#626985] leading-relaxed line-clamp-3">
+                      {art.meta_description || "Read our full technical breakdown and actionable frameworks."}
+                    </p>
                   </div>
-                </div>
 
-                <h2 className="text-xl font-bold text-[#10183A] mb-3 leading-snug hover:text-[#6366F1] transition-colors">
-                  {art.title}
-                </h2>
+                  <div className="pt-6 mt-6 border-t border-[#E6E7F0] flex items-center justify-between">
+                    <div className="flex items-center gap-2 text-xs text-[#626985]">
+                      <div className="w-6 h-6 rounded-full bg-[#E8E7FF] text-[#6366F1] flex items-center justify-center font-bold text-[10px]">
+                        H
+                      </div>
+                      <span>{art.author || "HelloShiva Editorial"}</span>
+                    </div>
 
-                <p className="text-xs sm:text-sm text-[#626985] leading-relaxed mb-6">
-                  {art.excerpt}
-                </p>
-              </div>
+                    <Link
+                      href={`/blog/${art.slug}`}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-[#6366F1] group-hover:translate-x-1 transition-transform"
+                    >
+                      <span>Read Technical Guide</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </Link>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+        )}
+      </div>
 
-              <div className="pt-4 border-t border-[#E6E7F0] flex items-center justify-between text-xs font-semibold">
-                <Link
-                  href={art.toolLink.href}
-                  className="text-[#8067FF] hover:underline"
-                >
-                  Try: {art.toolLink.name} ↗
-                </Link>
-                <Link
-                  href="/contact"
-                  className="text-[#6366F1] hover:text-[#8067FF] flex items-center gap-1"
-                >
-                  <span>Discuss Strategy</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
-              </div>
-            </div>
-          ))}
+      {/* Bottom CTA Banner */}
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-20">
+        <div className="bg-[#0B1025] rounded-3xl p-8 sm:p-12 text-white border border-[#252B49] text-center space-y-6">
+          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-[#171F42] text-[#8067FF] border border-[#252B49]">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>HelloShiva Growth Engineering</span>
+          </div>
+          <h2 className="text-2xl sm:text-3xl font-extrabold max-w-2xl mx-auto">
+            Ready to Build a Search Engine Pipeline That Outranks Your Competitors?
+          </h2>
+          <p className="text-sm text-[#C6C9DC] max-w-xl mx-auto leading-relaxed">
+            Stop relying on surface-level keyword guessing. Our senior web engineers and SEO architects audit code, fix Core Web Vitals, and build compounding organic traffic.
+          </p>
+          <div className="flex flex-wrap items-center justify-center gap-4 pt-2">
+            <Link
+              href="/contact"
+              className="px-6 py-3.5 rounded-xl font-bold text-xs text-white bg-gradient-to-r from-[#6366F1] to-[#8067FF] hover:opacity-90 shadow-lg shadow-indigo-500/25 transition-all"
+            >
+              Schedule Strategy Consultation &rarr;
+            </Link>
+            <Link
+              href="/tools"
+              className="px-6 py-3.5 rounded-xl font-bold text-xs text-[#C6C9DC] bg-[#171F42] hover:bg-[#252B49] border border-[#252B49] transition-all"
+            >
+              Test Our 10 Free Tools
+            </Link>
+          </div>
         </div>
       </div>
     </div>

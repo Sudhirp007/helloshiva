@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   Search,
@@ -18,6 +18,9 @@ import {
   X,
   Sparkles,
   ShieldAlert,
+  LogOut,
+  FileText,
+  User,
 } from "lucide-react";
 
 const navSections = [
@@ -33,18 +36,58 @@ const navSections = [
       { name: "1. Overview Dashboard", href: "/admin/content-engine/overview", icon: <LayoutDashboard className="w-4 h-4" /> },
       { name: "2. SEO Research Desk", href: "/admin/content-engine/research", icon: <Search className="w-4 h-4" /> },
       { name: "3. Editorial Calendar", href: "/admin/content-engine/calendar", icon: <Calendar className="w-4 h-4" /> },
-      { name: "4. AI Drafting Desk", href: "/admin/content-engine/drafting", icon: <FileEdit className="w-4 h-4" /> },
+      { name: "4. AI Drafting & Editor", href: "/admin/content-engine/drafting", icon: <FileEdit className="w-4 h-4" /> },
       { name: "5. SEO Optimization", href: "/admin/content-engine/optimization", icon: <CheckCircle className="w-4 h-4" /> },
       { name: "6. Social Distribution", href: "/admin/content-engine/social", icon: <Share2 className="w-4 h-4" /> },
       { name: "7. Publishing Queue", href: "/admin/content-engine/queue", icon: <Clock className="w-4 h-4" /> },
-      { name: "8. Settings & Flags", href: "/admin/content-engine/settings", icon: <Settings className="w-4 h-4" /> },
+      { name: "8. Articles Library", href: "/admin/content-engine/articles", icon: <FileText className="w-4 h-4" /> },
+      { name: "9. Settings & Flags", href: "/admin/content-engine/settings", icon: <Settings className="w-4 h-4" /> },
     ],
   },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  // If on admin login page, render full screen without the sidebar layout
+  const isLoginPage = pathname === "/admin/login";
+
+  useEffect(() => {
+    if (isLoginPage) {
+      setAuthChecked(true);
+      return;
+    }
+
+    // Check auth
+    const isAuth = localStorage.getItem("helloshiva_admin_auth");
+    if (!isAuth) {
+      router.push("/admin/login");
+    } else {
+      setAuthChecked(true);
+    }
+  }, [pathname, isLoginPage, router]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("helloshiva_admin_auth");
+    localStorage.removeItem("helloshiva_admin_user");
+    document.cookie = "helloshiva_admin_session=; path=/; max-age=0";
+    router.push("/admin/login");
+  };
+
+  if (isLoginPage) {
+    return <>{children}</>;
+  }
+
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-[#0B1025] flex items-center justify-center text-white text-xs">
+        Verifying agency administrator credentials...
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#F5F4FF] flex flex-col md:flex-row font-sans">
@@ -118,25 +161,35 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </nav>
         </div>
 
-        {/* Footer Sidebar Info */}
+        {/* Footer Sidebar Info & Logout */}
         <div className="pt-6 border-t border-[#252B49] space-y-3">
           <div className="p-3 rounded-xl bg-[#171F42] border border-[#252B49] text-[11px] space-y-1">
-            <div className="flex items-center gap-1.5 font-bold text-white">
+            <div className="flex items-center justify-between">
+              <span className="font-bold text-white">Admin: Owner Gate</span>
               <span className="w-2 h-2 rounded-full bg-emerald-400" />
-              <span>Staging Mode Active</span>
             </div>
             <p className="text-[#C6C9DC]/70 text-[10px] leading-snug">
-              Auto-publishing locked. All social posts copy-only.
+              Manual sign-off required for all public releases.
             </p>
           </div>
 
-          <Link
-            href="/"
-            className="flex items-center gap-2 text-xs text-[#C6C9DC]/70 hover:text-white transition-colors px-2 py-1"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            <span>Return to Public Website</span>
-          </Link>
+          <div className="flex items-center justify-between px-1">
+            <Link
+              href="/"
+              className="flex items-center gap-1.5 text-xs text-[#C6C9DC]/70 hover:text-white transition-colors"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Website</span>
+            </Link>
+
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-1.5 text-xs text-red-400 hover:text-red-300 transition-colors cursor-pointer"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Logout</span>
+            </button>
+          </div>
         </div>
       </aside>
 

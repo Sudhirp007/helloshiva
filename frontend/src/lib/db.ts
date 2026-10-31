@@ -12,6 +12,8 @@ interface TableData {
   social_posts: any[];
   content_activity_logs: any[];
   integration_settings: any[];
+  admin_users: any[];
+  client_audits: any[];
 }
 
 const dbDir = path.join(process.cwd(), "data");
@@ -34,7 +36,21 @@ class JsonDatabase {
     try {
       if (fs.existsSync(jsonDbPath)) {
         const raw = fs.readFileSync(jsonDbPath, "utf-8");
-        return JSON.parse(raw);
+        const parsed = JSON.parse(raw);
+        return {
+          enquiries: parsed.enquiries || [],
+          feature_flags: parsed.feature_flags || [],
+          keyword_opportunities: parsed.keyword_opportunities || [],
+          editorial_calendar: parsed.editorial_calendar || [],
+          articles: parsed.articles || [],
+          article_versions: parsed.article_versions || [],
+          seo_audits: parsed.seo_audits || [],
+          social_posts: parsed.social_posts || [],
+          content_activity_logs: parsed.content_activity_logs || [],
+          integration_settings: parsed.integration_settings || [],
+          admin_users: parsed.admin_users || [],
+          client_audits: parsed.client_audits || [],
+        };
       }
     } catch (e) {
       console.error("Failed to parse jsonDbPath, initializing fresh store:", e);
@@ -50,6 +66,8 @@ class JsonDatabase {
       social_posts: [],
       content_activity_logs: [],
       integration_settings: [],
+      admin_users: [],
+      client_audits: [],
     };
   }
 
@@ -64,6 +82,9 @@ class JsonDatabase {
   }
 
   private seedDefaults() {
+    let modified = false;
+
+    // 1. Feature flags
     if (!this.data.feature_flags || this.data.feature_flags.length === 0) {
       this.data.feature_flags = [
         { key: "CONTENT_ENGINE_ENABLED", enabled: 1, description: "Master switch for the Content Engine" },
@@ -77,6 +98,179 @@ class JsonDatabase {
         { key: "SCHEDULED_RESEARCH_ENABLED", enabled: 0, description: "Enable background scheduled research" },
         { key: "AUTOMATIC_PUBLISHING_ENABLED", enabled: 0, description: "LOCKED: Automatic production publishing" },
       ];
+      modified = true;
+    }
+
+    // 2. Admin user
+    if (!this.data.admin_users || this.data.admin_users.length === 0) {
+      this.data.admin_users = [
+        {
+          id: "admin-1",
+          email: "admin@helloshiva.com",
+          password: "admin", // simple initial pass
+          name: "HelloShiva Lead Administrator",
+          role: "SUPER_ADMIN",
+          created_at: new Date().toISOString(),
+        },
+      ];
+      modified = true;
+    }
+
+    // 3. Seed initial published articles if none exist
+    if (!this.data.articles || this.data.articles.length === 0) {
+      this.data.articles = [
+        {
+          id: "art-seed-1",
+          calendar_id: null,
+          title: "Why Technical SEO is the Non-Negotiable Foundation for Content Success",
+          slug: "why-technical-seo-is-the-prerequisite-for-content-success",
+          meta_description: "Discover why technical SEO must precede content scaling. Learn how DOM rendering bottlenecks, crawl budget waste, and schema errors derail search rankings.",
+          category: "Technical SEO & Web Engineering",
+          outline: ["The Cost of Broken Technical Architecture", "DOM Rendering Bottlenecks", "Crawl Budget Optimization", "Actionable Technical Checklist", "Frequently Asked Questions"],
+          content_markdown: `# Why Technical SEO is the Non-Negotiable Foundation for Content Success
+
+In modern digital marketing, content strategy is frequently treated in a vacuum. Marketing executives commit significant budgets to editorial calendars, freelance writers, and content generation engines. Yet months later, organic search traffic remains flat.
+
+The diagnosis is almost always identical: **the website has structural, code-level technical SEO bottlenecks that prevent Googlebot from efficiently discovering, rendering, and indexing pages.**
+
+---
+
+## 1. The Rendering Gap: Why Content Quality Means Nothing to an Unrendered DOM
+
+Search engines do not read your website like human visitors. Before an algorithm can evaluate topical depth or keyword relevance, it must complete two computationally expensive stages:
+1. **HTTP Fetching & Crawl Budget Allocation**
+2. **JavaScript Execution & DOM Tree Construction**
+
+When modern web applications overload the browser with massive JavaScript client bundles, search engine rendering queues get delayed by days or weeks. If your canonical tags, structured data, or primary headings rely on client-side state resolution, search crawlers frequently index an incomplete DOM.
+
+> 💡 **HelloShiva Strategic Tip:** Never rely exclusively on client-side rendering for indexable pages. Implement Server-Side Rendering (SSR) or Static Site Generation (SSG) with incremental static revalidation. You can audit your live headers and status codes using our free [HTTP Headers Checker](/tools/http-headers-checker).
+
+---
+
+## 2. Eliminating Crawl Budget Waste Across Commercial Architectures
+
+For websites with hundreds or thousands of pages, crawl budget allocation directly influences how quickly your revenue-generating content ranks. Common issues include:
+
+* **Infinite URL Parameter Traps:** Dynamic sorting and filtering URLs without canonicalization directives.
+* **Orphaned Content Clusters:** Articles published without contextual internal links from authoritative service pages.
+* **Malformed Robots Directives:** Accidentally blocking CSS or JavaScript assets that Googlebot requires to determine mobile responsiveness.
+
+Before launching an aggressive content marketing campaign, verify your crawler rules with our [Robots.txt Tester](/tools/robots-txt-tester) and audit URL hierarchies with the [SEO Page Analyzer](/tools/seo-page-analyzer).
+
+---
+
+## 3. The 4-Step Technical SEO Prerequisite Checklist
+
+Before scaling your content output, ensure your engineering team verifies these four benchmarks:
+
+1. **Sub-2.5s Largest Contentful Paint (LCP):** Eliminate render-blocking stylesheets and prioritize critical hero images.
+2. **Strict Semantic Heading Hierarchy:** Ensure each document features exactly one authoritative \`<h1>\` tag supported by structured \`<h2>\` and \`<h3>\` sections. Test this using our [Heading Structure Checker](/tools/heading-checker).
+3. **Valid JSON-LD Schema Markup:** Explicitly declare Article, Organization, and FAQPage schemas to claim rich Google search snippets.
+4. **Contextual Internal Linking Architecture:** Every informative article must connect back to high-intent commercial service offerings, such as [HelloShiva Technical SEO Services](/services/technical-seo) or [Performance Marketing Management](/services/performance-marketing).
+
+---
+
+## Frequently Asked Questions
+
+### Why does technical SEO matter if our content is already top tier?
+Even world-class content cannot rank if search engine spiders encounter 5xx server timeouts, conflicting canonical tags, or slow JavaScript execution queues. Technical SEO ensures search engines can effortlessly parse and trust your content.
+
+### How often should an agency audit technical search health?
+At HelloShiva, we recommend bi-weekly automated health audits and comprehensive quarterly architecture reviews to identify crawl anomalies before they impact revenue.
+
+### What is the fastest way to get started with an audit?
+You can use HelloShiva's suite of [10 Free Marketing Tools](/tools) to analyze individual pages immediately, or contact our engineering team to book a dedicated architecture audit.
+
+---
+
+> 🚀 **Ready to scale your organic search pipeline?**  
+> Explore our full [Technical SEO Architecture Services](/services/technical-seo) or [Schedule a Free Strategy Consultation](/contact) with our senior growth engineers today.
+`,
+          current_version: 1,
+          status: "PUBLISHED",
+          author: "HelloShiva Strategic Engineering",
+          created_at: "2026-10-25T10:00:00.000Z",
+          updated_at: "2026-10-31T08:00:00.000Z",
+          published_at: "2026-10-25T12:00:00.000Z",
+        },
+        {
+          id: "art-seed-2",
+          calendar_id: null,
+          title: "The 2026 Core Web Vitals Blueprint: How to Achieve Sub-Second LCP and Flawless INP",
+          slug: "the-2026-core-web-vitals-blueprint",
+          meta_description: "Master Core Web Vitals in 2026 with HelloShiva's engineering guide. Fix Interaction to Next Paint (INP) latency and optimize Largest Contentful Paint (LCP).",
+          category: "Core Web Vitals & Web Engineering",
+          outline: ["Understanding the 2026 Metrics", "Diagnosing INP Bottlenecks", "Server Response & LCP", "The Conversion Connection", "FAQ"],
+          content_markdown: `# The 2026 Core Web Vitals Blueprint: How to Achieve Sub-Second LCP and Flawless INP
+
+Google's search algorithm prioritizes real-world user experience above vanity design. With Interaction to Next Paint (INP) established as a core ranking signal, enterprise websites can no longer hide behind synthetic Lighthouse scores.
+
+When users tap a checkout button, expand an FAQ accordion, or filter product categories, unresponsive UI threads directly damage both search visibility and conversion rates.
+
+---
+
+## 1. Interaction to Next Paint (INP): Why Milliseconds Equal Millions
+
+Unlike the older First Input Delay (FID) which only measured initial page load, **Interaction to Next Paint (INP) monitors all user interactions throughout the entire lifecycle of a session.**
+
+If your web application runs heavy event handlers, long-running JavaScript loops, or unthrottled DOM mutations on user clicks, INP climbs above Google's 200ms threshold into "Poor" territory.
+
+### Key Strategies to Optimize INP:
+* **Yield to the Main Thread:** Break up long tasks using \`requestAnimationFrame()\` or \`scheduler.yield()\`.
+* **Offload Heavy Computation:** Utilize Web Workers for client-side data sorting and filtering.
+* **Debounce Form Validation:** Never trigger heavy recalculations on every single keystroke.
+
+---
+
+## 2. Achieving Sub-Second Largest Contentful Paint (LCP)
+
+Largest Contentful Paint measures perceived load speed. Google recommends an LCP under 2.5 seconds, but high-performing commercial websites target **under 1.2 seconds**.
+
+To achieve this:
+1. **Host Critical Assets on Edge CDNs:** Serve HTML and core assets from nodes geographically closest to your visitor.
+2. **Preload Hero Elements:** Use \`<link rel="preload" as="image">\` for top-of-page hero banners.
+3. **Eliminate Render-Blocking CSS:** Inline critical above-the-fold CSS and asynchronously load secondary typography.
+
+You can verify your server response headers and cache validation directives using our free [HTTP Headers Checker](/tools/http-headers-checker).
+
+---
+
+## 3. How Core Web Vitals Directly Impact Conversion Rates
+
+A 100ms improvement in page speed typically yields a 1.1% to 8.4% increase in e-commerce checkout completion and lead form submissions. Speed is not simply an engineering metric—it is a core driver of return on advertising spend (ROAS).
+
+When running paid Google or Meta campaigns, high latency inflates bounce rates, effectively burning your acquisition budget. Learn how our team aligns ad traffic with high-speed landing pages through [HelloShiva Performance Marketing](/services/performance-marketing).
+
+---
+
+## Frequently Asked Questions
+
+### What is a good INP score according to Google?
+A good INP score is **200 milliseconds or less**. Scores between 200ms and 500ms need improvement, while interactions exceeding 500ms are classified as poor.
+
+### How do Core Web Vitals affect Google Ads Quality Score?
+Google Ads landing page experience score directly incorporates load speed and mobile interactivity. Faster landing pages result in lower Cost-Per-Click (CPC) and higher ad placements.
+
+### Can HelloShiva help re-engineer our website for speed?
+Yes. Our web engineering team builds custom Next.js architectures that achieve 95+ Core Web Vitals scores by default. Explore our [Web Development Services](/services/web-development).
+
+---
+
+> 💼 **Transform your web performance into revenue.**  
+> [Contact HelloShiva Web Engineering](/contact) for a detailed technical audit and speed optimization plan.
+`,
+          current_version: 1,
+          status: "PUBLISHED",
+          author: "HelloShiva Strategic Engineering",
+          created_at: "2026-10-27T10:00:00.000Z",
+          updated_at: "2026-10-31T09:00:00.000Z",
+          published_at: "2026-10-27T12:00:00.000Z",
+        },
+      ];
+      modified = true;
+    }
+
+    if (modified) {
       this.save();
     }
   }
@@ -109,15 +303,22 @@ class JsonDatabase {
       );
     }
 
-    // 2. SELECT * FROM articles ORDER BY updated_at DESC
+    // 2. SELECT * FROM articles
     if (s.includes("from articles")) {
       let list = [...(this.data.articles || [])];
-      if (s.includes("status = 'approved'")) {
+      if (s.includes("status = 'published'")) {
+        list = list.filter((a) => a.status === "PUBLISHED");
+      } else if (s.includes("status = 'approved'")) {
         list = list.filter((a) => a.status === "APPROVED");
+      } else if (s.includes("status = 'draft_ready'")) {
+        list = list.filter((a) => a.status === "DRAFT_READY");
       }
-      list.sort((a, b) => (b.updated_at || "").localeCompare(a.updated_at || ""));
+      list.sort((a, b) => (b.updated_at || b.created_at || "").localeCompare(a.updated_at || a.created_at || ""));
       if (s.includes("limit 5")) {
         return list.slice(0, 5);
+      }
+      if (s.includes("limit 3")) {
+        return list.slice(0, 3);
       }
       return list;
     }
@@ -155,6 +356,13 @@ class JsonDatabase {
       return [...(this.data.social_posts || [])];
     }
 
+    // 8. SELECT * FROM client_audits
+    if (s.includes("from client_audits")) {
+      return [...(this.data.client_audits || [])].sort((a, b) =>
+        (b.timestamp || "").localeCompare(a.timestamp || "")
+      );
+    }
+
     return [];
   }
 
@@ -173,6 +381,9 @@ class JsonDatabase {
         if (s.includes("status = 'approved'")) {
           return { cnt: (this.data.articles || []).filter((a) => a.status === "APPROVED").length };
         }
+        if (s.includes("status = 'published'")) {
+          return { cnt: (this.data.articles || []).filter((a) => a.status === "PUBLISHED").length };
+        }
         return { cnt: (this.data.articles || []).length };
       }
       if (s.includes("from social_posts")) {
@@ -185,6 +396,29 @@ class JsonDatabase {
         return { cnt: (this.data.feature_flags || []).length };
       }
       return { cnt: 0 };
+    }
+
+    // SELECT * FROM articles WHERE slug = ?
+    if (s.includes("from articles where slug =")) {
+      const slugVal = params[0] || (sql.match(/slug = '([^']+)'/i)?.[1] ?? "");
+      return (this.data.articles || []).find((a) => a.slug === slugVal);
+    }
+
+    // SELECT * FROM articles WHERE id = ?
+    if (s.includes("from articles where id =")) {
+      const idVal = params[0] || (sql.match(/id = '([^']+)'/i)?.[1] ?? "");
+      return (this.data.articles || []).find((a) => a.id === idVal);
+    }
+
+    // SELECT * FROM admin_users WHERE email = ? AND password = ?
+    if (s.includes("from admin_users where email =")) {
+      const email = params[0];
+      const pass = params[1];
+      const user = (this.data.admin_users || []).find((u) => u.email === email);
+      if (user && (!pass || user.password === pass)) {
+        return user;
+      }
+      return undefined;
     }
 
     // SELECT value FROM integration_settings WHERE key = ...
@@ -286,7 +520,7 @@ class JsonDatabase {
 
     // 6. INSERT INTO articles
     else if (s.includes("insert into articles")) {
-      const [id, calendar_id, title, slug, meta_description, outline, content_markdown, current_version, status] = params;
+      const [id, calendar_id, title, slug, meta_description, outline, content_markdown, current_version, status, author] = params;
       this.data.articles.push({
         id,
         created_at: new Date().toISOString(),
@@ -294,12 +528,49 @@ class JsonDatabase {
         calendar_id, title, slug, meta_description, outline, content_markdown,
         current_version: current_version || 1,
         status: status || "DRAFT_READY",
-        author: "HelloShiva Editorial",
+        author: author || "HelloShiva Editorial",
       });
       changes = 1;
     }
 
-    // 7. INSERT INTO article_versions
+    // 7. UPDATE articles (status update / publishing)
+    else if (s.includes("update articles set status =")) {
+      const item = this.data.articles.find((a) => a.id === params[params.length - 1]);
+      if (item) {
+        item.status = params[0];
+        if (params[0] === "PUBLISHED") {
+          item.published_at = params[1] && params.length === 3 ? params[1] : (item.published_at || new Date().toISOString());
+        }
+        item.updated_at = new Date().toISOString();
+        changes = 1;
+      }
+    }
+
+    // 8. UPDATE articles (content edit)
+    else if (s.includes("update articles set title =")) {
+      // UPDATE articles SET title = ?, slug = ?, meta_description = ?, content_markdown = ?, updated_at = ? WHERE id = ?
+      const id = params[params.length - 1];
+      const item = this.data.articles.find((a) => a.id === id);
+      if (item) {
+        item.title = params[0];
+        item.slug = params[1];
+        item.meta_description = params[2];
+        item.content_markdown = params[3];
+        item.updated_at = new Date().toISOString();
+        item.current_version = (item.current_version || 1) + 1;
+        changes = 1;
+      }
+    }
+
+    // 9. DELETE FROM articles WHERE id = ?
+    else if (s.includes("delete from articles where id = ?")) {
+      const [id] = params;
+      const initial = this.data.articles.length;
+      this.data.articles = this.data.articles.filter((a) => a.id !== id);
+      changes = initial - this.data.articles.length;
+    }
+
+    // 10. INSERT INTO article_versions
     else if (s.includes("insert into article_versions")) {
       const [id, article_id, version_number, created_by, change_summary, content_markdown] = params;
       this.data.article_versions.push({
@@ -310,7 +581,7 @@ class JsonDatabase {
       changes = 1;
     }
 
-    // 8. INSERT INTO keyword_opportunities
+    // 11. INSERT INTO keyword_opportunities
     else if (s.includes("insert into keyword_opportunities")) {
       const [id, keyword, search_intent, topic_cluster, suggested_title, explanation, comp, src] = params;
       this.data.keyword_opportunities.push({
@@ -325,7 +596,7 @@ class JsonDatabase {
       changes = 1;
     }
 
-    // 9. INSERT INTO seo_audits
+    // 12. INSERT INTO seo_audits
     else if (s.includes("insert into seo_audits")) {
       const [id, article_id, checklist_results, recommendations, is_approved] = params;
       this.data.seo_audits.push({
@@ -337,7 +608,7 @@ class JsonDatabase {
       changes = 1;
     }
 
-    // 10. INSERT INTO social_posts
+    // 13. INSERT INTO social_posts
     else if (s.includes("insert into social_posts")) {
       const [id, article_id, platform, content_text, hashtags, slide_data] = params;
       this.data.social_posts.push({
@@ -347,7 +618,7 @@ class JsonDatabase {
       changes = 1;
     }
 
-    // 11. UPDATE feature_flags
+    // 14. UPDATE feature_flags
     else if (s.includes("update feature_flags set enabled = ? where key = ?")) {
       const [enabled, key] = params;
       const flag = this.data.feature_flags.find((f) => f.key === key);
@@ -357,7 +628,7 @@ class JsonDatabase {
       }
     }
 
-    // 12. UPSERT integration_settings
+    // 15. UPSERT integration_settings
     else if (s.includes("integration_settings")) {
       const [key, value] = params;
       const existing = this.data.integration_settings.find((s) => s.key === key);
@@ -371,6 +642,21 @@ class JsonDatabase {
           updated_at: new Date().toISOString(),
         });
       }
+      changes = 1;
+    }
+
+    // 16. INSERT INTO client_audits
+    else if (s.includes("insert into client_audits")) {
+      const [id, tool_name, target_url, score, summary, user_email] = params;
+      this.data.client_audits.push({
+        id,
+        tool_name,
+        target_url,
+        score,
+        summary,
+        user_email: user_email || "guest@client.helloshiva.com",
+        timestamp: new Date().toISOString(),
+      });
       changes = 1;
     }
 

@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FileEdit, Sparkles, Loader2, CheckCircle2, ArrowRight, Wand2, Copy, Eye, HelpCircle } from "lucide-react";
+import { FileEdit, Sparkles, Loader2, Wand2, Copy, Check, ArrowRight, BookOpen } from "lucide-react";
+import RichArticleEditor from "@/components/admin/RichArticleEditor";
 
 function AiDraftingDeskInner() {
   const router = useRouter();
@@ -20,11 +21,14 @@ function AiDraftingDeskInner() {
 
   // Improve Form State
   const [origTitle, setOrigTitle] = useState("Why Technical SEO is the Prerequisite for Content Success");
-  const [origContent, setOrigContent] = useState(`Publishing great articles is useless if search engines face DOM rendering bottlenecks, indexing directives confusion, or crawl budget waste. Here is how to fix code-level SEO first.`);
+  const [origContent, setOrigContent] = useState(
+    `Publishing great articles is useless if search engines face DOM rendering bottlenecks, indexing directives confusion, or crawl budget waste. Here is how to fix code-level SEO first.`
+  );
 
   // Processing state
   const [loading, setLoading] = useState(false);
   const [draftResult, setDraftResult] = useState<any>(null);
+  const [draftArticleId, setDraftArticleId] = useState<string>("");
   const [improvementResult, setImprovementResult] = useState<any>(null);
   const [error, setError] = useState("");
 
@@ -76,6 +80,7 @@ function AiDraftingDeskInner() {
       }
 
       setDraftResult(data.draft);
+      setDraftArticleId(data.articleId || `art-${Date.now()}`);
     } catch (err: any) {
       setError(err.message || "An unexpected error occurred.");
     } finally {
@@ -115,26 +120,18 @@ function AiDraftingDeskInner() {
     }
   };
 
-  const handleTransferToOptimization = () => {
-    if (draftResult) {
-      // Store in session storage or navigate to optimization
-      sessionStorage.setItem("draft_for_audit", JSON.stringify(draftResult));
-      router.push("/admin/content-engine/optimization");
-    }
-  };
-
   return (
     <div className="space-y-8">
       <div>
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#E8E7FF] text-[#6366F1] mb-2">
           <Sparkles className="w-3.5 h-3.5" />
-          Desk 3 • AI Editorial Engine (Google Gemini API Adapter)
+          Desk 4 • AI Editorial Engine & Professional SEO Editor
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-[#10183A]">
-          AI Drafting & Content Improvement Desk
+          AI Drafting & Rich SEO Content Studio
         </h1>
         <p className="text-sm text-[#626985]">
-          Generate 1,000–1,500 word technical drafts from approved briefs, or optimize existing articles with side-by-side comparison.
+          Generate 1,000–1,500 word commercial drafts from approved calendar briefs, edit with rich SEO formatting, and verify quantitative metrics live before publishing.
         </p>
       </div>
 
@@ -148,7 +145,7 @@ function AiDraftingDeskInner() {
               : "text-[#626985] hover:bg-white"
           }`}
         >
-          A. Create New Article Draft
+          A. Create & Generate New Draft
         </button>
         <button
           onClick={() => setActiveTab("improve")}
@@ -172,6 +169,11 @@ function AiDraftingDeskInner() {
       {activeTab === "create" && (
         <div className="space-y-8">
           <div className="bg-white rounded-3xl border border-[#E6E7F0] p-6 sm:p-8 shadow-sm">
+            <h2 className="text-sm font-bold text-[#10183A] mb-4 flex items-center gap-2">
+              <BookOpen className="w-4 h-4 text-[#6366F1]" />
+              <span>Draft Brief Parameters</span>
+            </h2>
+
             <form onSubmit={handleGenerateDraft} className="space-y-5">
               <div>
                 <label className="block text-xs font-semibold text-[#10183A] mb-1">
@@ -260,43 +262,30 @@ function AiDraftingDeskInner() {
             </form>
           </div>
 
-          {/* Draft Display */}
+          {/* Mount the Rich SEO Article Editor once draft is ready! */}
           {draftResult && (
-            <div className="bg-white rounded-3xl border border-[#E6E7F0] p-6 sm:p-10 shadow-sm space-y-6">
-              <div className="flex flex-wrap items-center justify-between gap-4 border-b border-[#E6E7F0] pb-4">
+            <div className="space-y-4 pt-4">
+              <div className="flex items-center justify-between">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#6366F1]">
-                    Draft Ready • Model: {draftResult.modelUsed}
+                  <span className="text-xs font-bold text-[#6366F1] uppercase tracking-wider">
+                    Draft Generated Successfully
                   </span>
-                  <h2 className="text-xl font-extrabold text-[#10183A]">{draftResult.title}</h2>
-                  <div className="text-xs text-[#626985] font-mono mt-1">Slug: /blog/{draftResult.slug}</div>
+                  <h3 className="text-lg font-extrabold text-[#10183A]">
+                    Live Interactive SEO Workspace
+                  </h3>
                 </div>
-
-                <button
-                  onClick={handleTransferToOptimization}
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-[#6366F1] to-[#8067FF] hover:opacity-90 shadow-md transition-all cursor-pointer"
-                >
-                  <span>Transfer to Desk 5: SEO Review</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
-                </button>
               </div>
 
-              {/* Meta Description */}
-              <div className="p-4 rounded-xl bg-[#F5F4FF] border border-[#E8E7FF] text-xs space-y-1">
-                <span className="font-bold text-[#10183A]">Proposed Meta Description:</span>
-                <p className="text-[#626985]">{draftResult.metaDescription}</p>
-              </div>
-
-              {/* Markdown Content Area */}
-              <div className="space-y-2">
-                <label className="text-xs font-semibold text-[#10183A]">Article Markdown (Editable):</label>
-                <textarea
-                  rows={18}
-                  value={draftResult.contentMarkdown}
-                  onChange={(e) => setDraftResult({ ...draftResult, contentMarkdown: e.target.value })}
-                  className="w-full px-5 py-4 rounded-2xl bg-[#0B1025] text-[#C6C9DC] font-mono text-xs leading-relaxed focus:outline-none"
-                />
-              </div>
+              <RichArticleEditor
+                articleId={draftArticleId}
+                initialTitle={draftResult.title}
+                initialSlug={draftResult.slug}
+                initialMetaDescription={draftResult.metaDescription}
+                initialContent={draftResult.contentMarkdown}
+                initialKeyword={primaryKeyword}
+                initialCategory={theme || "Technical SEO"}
+                initialStatus="DRAFT_READY"
+              />
             </div>
           )}
         </div>
@@ -348,29 +337,49 @@ function AiDraftingDeskInner() {
                 Proposed Improvements & Side-by-Side Review
               </h2>
 
-              <div className="p-4 rounded-2xl bg-[#F5F4FF] border border-[#E8E7FF] text-xs space-y-2">
-                <span className="font-bold text-[#6366F1]">Summary of Key Enhancements:</span>
-                <ul className="list-disc pl-5 space-y-1 text-[#626985]">
-                  {improvementResult.changeSummary.map((ch: string, idx: number) => (
-                    <li key={idx}>{ch}</li>
-                  ))}
-                </ul>
-              </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <span className="text-xs font-bold text-[#10183A] block mb-2">Original Content:</span>
-                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-xs font-mono text-slate-700 max-h-80 overflow-y-auto">
+                  <span className="text-xs font-bold text-[#626985] block mb-2">Original Version:</span>
+                  <div className="p-4 rounded-2xl bg-[#F5F4FF] border border-[#E6E7F0] text-xs font-mono text-[#10183A] whitespace-pre-wrap h-80 overflow-y-auto">
                     {origContent}
                   </div>
                 </div>
 
                 <div>
-                  <span className="text-xs font-bold text-[#6366F1] block mb-2">Proposed Optimized Version:</span>
-                  <div className="p-4 rounded-2xl bg-[#0B1025] border border-[#252B49] text-xs font-mono text-[#C6C9DC] max-h-80 overflow-y-auto">
-                    {improvementResult.proposedContentMarkdown}
+                  <span className="text-xs font-bold text-[#6366F1] block mb-2">Enhanced & Optimized Version:</span>
+                  <div className="p-4 rounded-2xl bg-[#0B1025] border border-[#252B49] text-xs font-mono text-[#C6C9DC] whitespace-pre-wrap h-80 overflow-y-auto">
+                    {improvementResult.improvedMarkdown}
                   </div>
                 </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-[#F5F4FF] border border-[#E8E7FF] space-y-2">
+                <span className="text-xs font-bold text-[#10183A]">Specific SEO Upgrades Applied:</span>
+                <ul className="list-disc list-inside text-xs text-[#626985] space-y-1">
+                  {improvementResult.changesMade?.map((c: string, idx: number) => (
+                    <li key={idx}>{c}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="flex justify-end">
+                <button
+                  onClick={() => {
+                    setHeadline(origTitle);
+                    setDraftResult({
+                      title: origTitle,
+                      slug: origTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+                      metaDescription: `Improved guide on ${origTitle}`,
+                      contentMarkdown: improvementResult.improvedMarkdown,
+                      modelUsed: "Gemini Optimization",
+                    });
+                    setDraftArticleId(`art-${Date.now()}`);
+                    setActiveTab("create");
+                  }}
+                  className="px-6 py-2.5 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-[#6366F1] to-[#8067FF] cursor-pointer"
+                >
+                  Load into Rich SEO Editor &rarr;
+                </button>
               </div>
             </div>
           )}
@@ -384,9 +393,9 @@ export default function AiDraftingDeskPage() {
   return (
     <Suspense
       fallback={
-        <div className="p-8 text-center text-[#626985]">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto text-[#6366F1] mb-2" />
-          Loading AI Drafting Desk...
+        <div className="p-12 text-center text-sm text-[#626985] flex items-center justify-center gap-2">
+          <Loader2 className="w-5 h-5 animate-spin text-[#6366F1]" />
+          <span>Loading Drafting Workspace...</span>
         </div>
       }
     >
