@@ -14,12 +14,14 @@ import {
   Sparkles,
   CheckCircle2,
   Clock,
+  Calendar,
 } from "lucide-react";
 
 export default function ArticlesLibraryPage() {
   const [articles, setArticles] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [actionId, setActionId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"ALL" | "DRAFTS" | "SCHEDULED" | "PUBLISHED">("ALL");
 
   const loadArticles = () => {
     setLoading(true);
@@ -76,53 +78,99 @@ export default function ArticlesLibraryPage() {
     window.location.href = "/admin/content-engine/social";
   };
 
+  const filteredArticles = articles.filter((a) => {
+    if (activeTab === "DRAFTS") return a.status === "DRAFT_READY" && !a.scheduled_date;
+    if (activeTab === "SCHEDULED") return a.status === "SCHEDULED" || (a.status !== "PUBLISHED" && a.scheduled_date);
+    if (activeTab === "PUBLISHED") return a.status === "PUBLISHED";
+    return true;
+  });
+
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 font-sans max-w-full">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#E8E7FF] text-[#6366F1] mb-2">
             <FileText className="w-3.5 h-3.5" />
-            Articles & Commercial Insights Library
+            Desk 6 • Central Articles Library & Master Catalog
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-[#10183A]">
-            Article Management & SEO Editor Desk
+            Article Management & Content Catalog
           </h1>
           <p className="text-sm text-[#626985]">
-            Edit published guides, review AI-generated drafts, update metadata, and control live status.
+            Complete directory of all drafts, scheduled publications, and live published guides.
           </p>
         </div>
 
         <Link
           href="/admin/content-engine/drafting"
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#6366F1] to-[#8067FF] hover:opacity-90 shadow-md shadow-indigo-500/25"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#6366F1] to-[#8067FF] hover:opacity-90 shadow-md shadow-indigo-500/20"
         >
-          <span>+ Generate New Article Draft</span>
+          <span>+ Generate New Article</span>
         </Link>
       </div>
 
       <div className="bg-white rounded-3xl border border-[#E6E7F0] p-6 sm:p-8 shadow-sm space-y-6">
-        <div className="flex items-center justify-between border-b border-[#E6E7F0] pb-4">
-          <span className="text-xs font-bold text-[#10183A] uppercase tracking-wider">
-            All Articles ({articles.length})
-          </span>
-          <span className="text-xs text-[#626985]">
-            {articles.filter((a) => a.status === "PUBLISHED").length} Published Live
-          </span>
+        {/* Tabs */}
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E6E7F0] pb-4">
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setActiveTab("ALL")}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                activeTab === "ALL" ? "bg-[#0B1025] text-white" : "text-[#626985] hover:bg-[#F5F4FF]"
+              }`}
+            >
+              All Articles ({articles.length})
+            </button>
+            <button
+              onClick={() => setActiveTab("DRAFTS")}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                activeTab === "DRAFTS" ? "bg-[#0B1025] text-white" : "text-[#626985] hover:bg-[#F5F4FF]"
+              }`}
+            >
+              Drafts ({articles.filter((a) => a.status === "DRAFT_READY" && !a.scheduled_date).length})
+            </button>
+            <button
+              onClick={() => setActiveTab("SCHEDULED")}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                activeTab === "SCHEDULED" ? "bg-blue-600 text-white" : "text-[#626985] hover:bg-[#F5F4FF]"
+              }`}
+            >
+              Scheduled ({articles.filter((a) => a.status === "SCHEDULED" || (a.status !== "PUBLISHED" && a.scheduled_date)).length})
+            </button>
+            <button
+              onClick={() => setActiveTab("PUBLISHED")}
+              className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                activeTab === "PUBLISHED" ? "bg-emerald-600 text-white" : "text-[#626985] hover:bg-[#F5F4FF]"
+              }`}
+            >
+              Published Live ({articles.filter((a) => a.status === "PUBLISHED").length})
+            </button>
+          </div>
+
+          <Link
+            href="/blog"
+            target="_blank"
+            className="text-xs font-semibold text-[#6366F1] hover:underline flex items-center gap-1"
+          >
+            <span>Open Public Blog</span>
+            <ExternalLink className="w-3.5 h-3.5" />
+          </Link>
         </div>
 
         {loading ? (
           <div className="p-12 text-center text-xs text-[#626985] flex flex-col items-center gap-2">
             <Loader2 className="w-5 h-5 animate-spin text-[#6366F1]" />
-            <span>Loading articles...</span>
+            <span>Loading articles catalog...</span>
           </div>
-        ) : articles.length === 0 ? (
+        ) : filteredArticles.length === 0 ? (
           <div className="p-12 text-center text-xs text-[#626985]">
-            No articles found. Start by generating a draft in Desk 4.
+            No articles match the current filter.
           </div>
         ) : (
           <div className="divide-y divide-[#E6E7F0]">
-            {articles.map((art) => {
+            {filteredArticles.map((art) => {
               const isPub = art.status === "PUBLISHED";
+              const isSched = art.status === "SCHEDULED" || (!isPub && art.scheduled_date);
               return (
                 <div key={art.id} className="py-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                   <div className="space-y-1.5 max-w-2xl">
@@ -136,7 +184,13 @@ export default function ArticlesLibraryPage() {
                     <div className="flex flex-wrap items-center gap-3 text-xs text-[#626985]">
                       <span>ID: {art.id}</span>
                       <span>• Slug: /blog/{art.slug}</span>
-                      <span>• Author: {art.author || "HelloShiva Editorial"}</span>
+                      <span>• Category: {art.category || "Technical SEO"}</span>
+                      {art.scheduled_date && (
+                        <span className="text-blue-600 font-semibold flex items-center gap-1">
+                          <Calendar className="w-3 h-3" />
+                          <span>Release: {art.scheduled_date}</span>
+                        </span>
+                      )}
                     </div>
 
                     {art.meta_description && (
@@ -149,6 +203,8 @@ export default function ArticlesLibraryPage() {
                       className={`px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider ${
                         isPub
                           ? "bg-emerald-100 text-emerald-800 border border-emerald-300"
+                          : isSched
+                          ? "bg-blue-100 text-blue-800 border border-blue-300"
                           : "bg-purple-100 text-purple-800 border border-purple-200"
                       }`}
                     >
@@ -161,20 +217,20 @@ export default function ArticlesLibraryPage() {
                         href={`/blog/${art.slug}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-semibold text-[#6366F1] bg-[#F5F4FF] hover:bg-[#E8E7FF] border border-[#E6E7F0]"
+                        className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold text-[#6366F1] bg-[#F5F4FF] hover:bg-[#E8E7FF] border border-[#E6E7F0]"
                       >
                         <span>View Live</span>
                         <ExternalLink className="w-3.5 h-3.5" />
                       </a>
                     )}
 
-                    {/* Edit in Rich Editor */}
+                    {/* Edit in Studio */}
                     <Link
                       href={`/admin/content-engine/articles/${art.id}`}
-                      className="inline-flex items-center gap-1 px-3 py-2 rounded-xl text-xs font-semibold text-[#10183A] bg-white hover:bg-[#F5F4FF] border border-[#E6E7F0]"
+                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold text-[#10183A] bg-white hover:bg-[#F5F4FF] border border-[#E6E7F0]"
                     >
                       <FileEdit className="w-3.5 h-3.5 text-[#6366F1]" />
-                      <span>Edit Post</span>
+                      <span>Edit</span>
                     </Link>
 
                     {/* Repurpose Social */}
@@ -186,11 +242,11 @@ export default function ArticlesLibraryPage() {
                       <Share2 className="w-4 h-4" />
                     </button>
 
-                    {/* Publish / Unpublish */}
+                    {/* Publish / Unpublish Toggle */}
                     <button
                       onClick={() => handleTogglePublish(art)}
                       disabled={actionId === art.id}
-                      className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold text-white transition-all cursor-pointer ${
+                      className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold text-white transition-all cursor-pointer ${
                         isPub ? "bg-amber-600 hover:bg-amber-700" : "bg-gradient-to-r from-[#6366F1] to-[#8067FF]"
                       }`}
                     >
@@ -201,12 +257,12 @@ export default function ArticlesLibraryPage() {
                       ) : (
                         <Globe className="w-3.5 h-3.5" />
                       )}
-                      <span>{isPub ? "Unpublish" : "Publish"}</span>
+                      <span>{isPub ? "Unpublish" : "Publish Now"}</span>
                     </button>
 
                     <button
                       onClick={() => handleDelete(art.id)}
-                      className="p-2 rounded-xl text-xs text-red-500 hover:bg-red-50"
+                      className="p-1.5 rounded-xl text-xs text-red-500 hover:bg-red-50 cursor-pointer"
                       title="Delete Article"
                     >
                       <Trash2 className="w-4 h-4" />

@@ -35,13 +35,11 @@ const navSections = [
     items: [
       { name: "1. Overview Dashboard", href: "/admin/content-engine/overview", icon: <LayoutDashboard className="w-4 h-4" /> },
       { name: "2. SEO Research Desk", href: "/admin/content-engine/research", icon: <Search className="w-4 h-4" /> },
-      { name: "3. Editorial Calendar", href: "/admin/content-engine/calendar", icon: <Calendar className="w-4 h-4" /> },
-      { name: "4. AI Drafting & Editor", href: "/admin/content-engine/drafting", icon: <FileEdit className="w-4 h-4" /> },
-      { name: "5. SEO Optimization", href: "/admin/content-engine/optimization", icon: <CheckCircle className="w-4 h-4" /> },
-      { name: "6. Social Distribution", href: "/admin/content-engine/social", icon: <Share2 className="w-4 h-4" /> },
-      { name: "7. Publishing Queue", href: "/admin/content-engine/queue", icon: <Clock className="w-4 h-4" /> },
-      { name: "8. Articles Library", href: "/admin/content-engine/articles", icon: <FileText className="w-4 h-4" /> },
-      { name: "9. Settings & Flags", href: "/admin/content-engine/settings", icon: <Settings className="w-4 h-4" /> },
+      { name: "3. AI Drafting & Studio", href: "/admin/content-engine/drafting", icon: <FileEdit className="w-4 h-4" /> },
+      { name: "4. Social Repurposing", href: "/admin/content-engine/social", icon: <Share2 className="w-4 h-4" /> },
+      { name: "5. Editorial Calendar", href: "/admin/content-engine/calendar", icon: <Calendar className="w-4 h-4" /> },
+      { name: "6. Article Library", href: "/admin/content-engine/articles", icon: <FileText className="w-4 h-4" /> },
+      { name: "7. Settings & Flags", href: "/admin/content-engine/settings", icon: <Settings className="w-4 h-4" /> },
     ],
   },
 ];

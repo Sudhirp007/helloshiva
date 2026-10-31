@@ -312,6 +312,8 @@ Yes. Our web engineering team builds custom Next.js architectures that achieve 9
         list = list.filter((a) => a.status === "APPROVED");
       } else if (s.includes("status = 'draft_ready'")) {
         list = list.filter((a) => a.status === "DRAFT_READY");
+      } else if (s.includes("status = 'scheduled'")) {
+        list = list.filter((a) => a.status === "SCHEDULED");
       }
       list.sort((a, b) => (b.updated_at || b.created_at || "").localeCompare(a.updated_at || a.created_at || ""));
       if (s.includes("limit 5")) {
@@ -533,13 +535,16 @@ Yes. Our web engineering team builds custom Next.js architectures that achieve 9
       changes = 1;
     }
 
-    // 7. UPDATE articles (status update / publishing)
+    // 7. UPDATE articles (status update / publishing / scheduling)
     else if (s.includes("update articles set status =")) {
-      const item = this.data.articles.find((a) => a.id === params[params.length - 1]);
+      const id = params[params.length - 1];
+      const item = this.data.articles.find((a) => a.id === id);
       if (item) {
         item.status = params[0];
         if (params[0] === "PUBLISHED") {
-          item.published_at = params[1] && params.length === 3 ? params[1] : (item.published_at || new Date().toISOString());
+          item.published_at = params[1] && params.length >= 3 ? params[1] : (item.published_at || new Date().toISOString());
+        } else if (params[0] === "SCHEDULED") {
+          item.scheduled_date = params[1] || item.scheduled_date || new Date().toISOString().split("T")[0];
         }
         item.updated_at = new Date().toISOString();
         changes = 1;
@@ -556,6 +561,9 @@ Yes. Our web engineering team builds custom Next.js architectures that achieve 9
         item.slug = params[1];
         item.meta_description = params[2];
         item.content_markdown = params[3];
+        if (params.length >= 6 && typeof params[4] === "string") {
+          item.scheduled_date = params[4];
+        }
         item.updated_at = new Date().toISOString();
         item.current_version = (item.current_version || 1) + 1;
         changes = 1;

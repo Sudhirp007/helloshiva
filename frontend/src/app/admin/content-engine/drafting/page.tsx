@@ -2,7 +2,19 @@
 
 import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { FileEdit, Sparkles, Loader2, Wand2, Copy, Check, ArrowRight, BookOpen } from "lucide-react";
+import {
+  FileEdit,
+  Sparkles,
+  Loader2,
+  Wand2,
+  Copy,
+  Check,
+  ArrowRight,
+  BookOpen,
+  FolderOpen,
+  Calendar,
+  Layers,
+} from "lucide-react";
 import RichArticleEditor from "@/components/admin/RichArticleEditor";
 
 function AiDraftingDeskInner() {
@@ -19,20 +31,19 @@ function AiDraftingDeskInner() {
   const [suggestedCta, setSuggestedCta] = useState("");
   const [calendarId, setCalendarId] = useState("");
 
-  // Improve Form State
-  const [origTitle, setOrigTitle] = useState("Why Technical SEO is the Prerequisite for Content Success");
-  const [origContent, setOrigContent] = useState(
-    `Publishing great articles is useless if search engines face DOM rendering bottlenecks, indexing directives confusion, or crawl budget waste. Here is how to fix code-level SEO first.`
-  );
+  // Improve Form State (Connected to real articles!)
+  const [existingArticles, setExistingArticles] = useState<any[]>([]);
+  const [selectedArticleId, setSelectedArticleId] = useState("");
+  const [selectedArticle, setSelectedArticle] = useState<any>(null);
+  const [loadingArticles, setLoadingArticles] = useState(false);
 
   // Processing state
   const [loading, setLoading] = useState(false);
   const [draftResult, setDraftResult] = useState<any>(null);
   const [draftArticleId, setDraftArticleId] = useState<string>("");
-  const [improvementResult, setImprovementResult] = useState<any>(null);
   const [error, setError] = useState("");
 
-  // Prefill from calendar if passed
+  // Prefill from URL query params (e.g. from SEO Research Desk!)
   useEffect(() => {
     if (searchParams) {
       const h = searchParams.get("headline");
@@ -51,6 +62,33 @@ function AiDraftingDeskInner() {
     }
   }, [searchParams]);
 
+  // Load existing articles when switching to Tab B
+  useEffect(() => {
+    if (activeTab === "improve") {
+      setLoadingArticles(true);
+      fetch("/api/v1/content-engine/articles")
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.success) {
+            setExistingArticles(data.articles);
+            if (data.articles.length > 0 && !selectedArticleId) {
+              setSelectedArticleId(data.articles[0].id);
+              setSelectedArticle(data.articles[0]);
+            }
+          }
+        })
+        .finally(() => setLoadingArticles(false));
+    }
+  }, [activeTab, selectedArticleId]);
+
+  const handleSelectExistingArticle = (id: string) => {
+    setSelectedArticleId(id);
+    const found = existingArticles.find((a) => a.id === id);
+    if (found) {
+      setSelectedArticle(found);
+    }
+  };
+
   const handleGenerateDraft = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!headline.trim() || !primaryKeyword.trim()) return;
@@ -68,7 +106,7 @@ function AiDraftingDeskInner() {
           headline: headline.trim(),
           primaryKeyword: primaryKeyword.trim(),
           theme: theme.trim() || "Technical SEO Strategy",
-          targetAudience: targetAudience.trim() || "Digital Marketers and Founders",
+          targetAudience: targetAudience.trim() || "Digital Marketers, Founders, and CTOs",
           suggestedCta: suggestedCta.trim(),
           calendarId,
         }),
@@ -88,50 +126,18 @@ function AiDraftingDeskInner() {
     }
   };
 
-  const handleImproveContent = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!origTitle.trim() || !origContent.trim()) return;
-
-    setLoading(true);
-    setError("");
-    setImprovementResult(null);
-
-    try {
-      const res = await fetch("/api/v1/content-engine/drafting", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "improve",
-          originalTitle: origTitle.trim(),
-          originalContent: origContent.trim(),
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        throw new Error(data.message || "Failed to improve content.");
-      }
-
-      setImprovementResult(data.improvement);
-    } catch (err: any) {
-      setError(err.message || "An unexpected error occurred.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 max-w-full font-sans">
       <div>
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#E8E7FF] text-[#6366F1] mb-2">
           <Sparkles className="w-3.5 h-3.5" />
-          Desk 4 • AI Editorial Engine & Professional SEO Editor
+          Desk 3 • AI Editorial Engine & Professional SEO Studio
         </div>
         <h1 className="text-2xl sm:text-3xl font-extrabold text-[#10183A]">
           AI Drafting & Rich SEO Content Studio
         </h1>
         <p className="text-sm text-[#626985]">
-          Generate 1,000–1,500 word commercial drafts from approved calendar briefs, edit with rich SEO formatting, and verify quantitative metrics live before publishing.
+          Generate 1,000–1,500 word commercial drafts from SEO research, edit with full formatting and callouts, and verify quantitative metrics live before publishing or scheduling.
         </p>
       </div>
 
@@ -139,23 +145,19 @@ function AiDraftingDeskInner() {
       <div className="flex gap-2 border-b border-[#E6E7F0] pb-3">
         <button
           onClick={() => setActiveTab("create")}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-            activeTab === "create"
-              ? "bg-[#0B1025] text-white shadow-sm"
-              : "text-[#626985] hover:bg-white"
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            activeTab === "create" ? "bg-[#0B1025] text-white shadow-sm" : "text-[#626985] hover:bg-white"
           }`}
         >
           A. Create & Generate New Draft
         </button>
         <button
           onClick={() => setActiveTab("improve")}
-          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-            activeTab === "improve"
-              ? "bg-[#0B1025] text-white shadow-sm"
-              : "text-[#626985] hover:bg-white"
+          className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+            activeTab === "improve" ? "bg-[#0B1025] text-white shadow-sm" : "text-[#626985] hover:bg-white"
           }`}
         >
-          B. Improve Existing Content
+          B. Edit & Improve Existing Articles ({existingArticles.length})
         </button>
       </div>
 
@@ -171,7 +173,7 @@ function AiDraftingDeskInner() {
           <div className="bg-white rounded-3xl border border-[#E6E7F0] p-6 sm:p-8 shadow-sm">
             <h2 className="text-sm font-bold text-[#10183A] mb-4 flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-[#6366F1]" />
-              <span>Draft Brief Parameters</span>
+              <span>Draft Brief Parameters (Prefilled from Research or Custom)</span>
             </h2>
 
             <form onSubmit={handleGenerateDraft} className="space-y-5">
@@ -244,12 +246,12 @@ function AiDraftingDeskInner() {
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-7 py-3 rounded-xl font-semibold text-xs text-white bg-gradient-to-r from-[#6366F1] to-[#8067FF] hover:from-[#5558E6] hover:to-[#7358F5] shadow-md shadow-indigo-500/20 disabled:opacity-50 flex items-center gap-2 cursor-pointer transition-all"
+                  className="px-7 py-3 rounded-xl font-bold text-xs text-white bg-gradient-to-r from-[#6366F1] to-[#8067FF] hover:from-[#5558E6] hover:to-[#7358F5] shadow-md shadow-indigo-500/20 disabled:opacity-50 flex items-center gap-2 cursor-pointer transition-all"
                 >
                   {loading ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      <span>Generating 1,200-Word Draft...</span>
+                      <span>Generating Humanized Technical Draft...</span>
                     </>
                   ) : (
                     <>
@@ -262,16 +264,16 @@ function AiDraftingDeskInner() {
             </form>
           </div>
 
-          {/* Mount the Rich SEO Article Editor once draft is ready! */}
+          {/* Mount the Rich Full-Width Editor once draft is ready! */}
           {draftResult && (
             <div className="space-y-4 pt-4">
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-xs font-bold text-[#6366F1] uppercase tracking-wider">
-                    Draft Generated Successfully
+                    Draft Ready • Model: {draftResult.modelUsed || "Gemini Editorial"}
                   </span>
                   <h3 className="text-lg font-extrabold text-[#10183A]">
-                    Live Interactive SEO Workspace
+                    Live Interactive Studio Workspace
                   </h3>
                 </div>
               </div>
@@ -291,96 +293,75 @@ function AiDraftingDeskInner() {
         </div>
       )}
 
-      {/* Tab B: Improve Content */}
+      {/* Tab B: Edit & Improve Existing Articles */}
       {activeTab === "improve" && (
         <div className="space-y-8">
-          <div className="bg-white rounded-3xl border border-[#E6E7F0] p-6 sm:p-8 shadow-sm">
-            <form onSubmit={handleImproveContent} className="space-y-5">
-              <div>
-                <label className="block text-xs font-semibold text-[#10183A] mb-1">Original Article Title</label>
-                <input
-                  type="text"
-                  required
-                  value={origTitle}
-                  onChange={(e) => setOrigTitle(e.target.value)}
-                  className="w-full px-4 py-2.5 rounded-xl border border-[#E6E7F0] text-sm text-[#10183A] focus:outline-none focus:border-[#6366F1]"
-                />
-              </div>
+          <div className="bg-white rounded-3xl border border-[#E6E7F0] p-6 sm:p-8 shadow-sm space-y-4">
+            <div className="flex items-center gap-2">
+              <FolderOpen className="w-4 h-4 text-[#6366F1]" />
+              <h2 className="text-sm font-bold text-[#10183A]">
+                Select an Article to Edit, Refine, or Re-Optimize
+              </h2>
+            </div>
+            <p className="text-xs text-[#626985]">
+              Load any existing drafted, scheduled, or published article directly into the studio to make content changes, add images, and recalculate SEO scores.
+            </p>
 
-              <div>
-                <label className="block text-xs font-semibold text-[#10183A] mb-1">Existing Article Markdown Content</label>
-                <textarea
-                  rows={6}
-                  required
-                  value={origContent}
-                  onChange={(e) => setOrigContent(e.target.value)}
-                  className="w-full px-4 py-3 rounded-xl border border-[#E6E7F0] text-xs font-mono text-[#10183A] focus:outline-none focus:border-[#6366F1]"
-                />
+            {loadingArticles ? (
+              <div className="p-8 text-center text-xs text-[#626985] flex items-center justify-center gap-2">
+                <Loader2 className="w-4 h-4 animate-spin text-[#6366F1]" />
+                <span>Loading existing articles...</span>
               </div>
-
-              <div className="flex justify-end">
-                <button
-                  type="submit"
-                  disabled={loading}
-                  className="px-6 py-2.5 rounded-xl font-semibold text-xs text-white bg-gradient-to-r from-[#6366F1] to-[#8067FF] flex items-center gap-2 cursor-pointer"
-                >
-                  {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Wand2 className="w-4 h-4" />}
-                  <span>Generate Proposed Improvements</span>
-                </button>
+            ) : existingArticles.length === 0 ? (
+              <div className="p-8 text-center text-xs text-[#626985]">
+                No articles found in database. Create a new draft in Tab A first.
               </div>
-            </form>
+            ) : (
+              <div className="space-y-4 pt-2">
+                <div>
+                  <label className="block text-xs font-semibold text-[#10183A] mb-1.5">
+                    Choose Article:
+                  </label>
+                  <select
+                    value={selectedArticleId}
+                    onChange={(e) => handleSelectExistingArticle(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-[#E6E7F0] text-xs font-semibold text-[#10183A] bg-white focus:outline-none focus:border-[#6366F1]"
+                  >
+                    {existingArticles.map((art) => (
+                      <option key={art.id} value={art.id}>
+                        [{art.status}] {art.title} (/blog/{art.slug})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+            )}
           </div>
 
-          {improvementResult && (
-            <div className="bg-white rounded-3xl border border-[#E6E7F0] p-6 sm:p-8 shadow-sm space-y-6">
-              <h2 className="text-base font-bold text-[#10183A] border-b border-[#E6E7F0] pb-3">
-                Proposed Improvements & Side-by-Side Review
-              </h2>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Mount the Rich Editor populated with the selected article! */}
+          {selectedArticle && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-[#E6E7F0] pb-2">
                 <div>
-                  <span className="text-xs font-bold text-[#626985] block mb-2">Original Version:</span>
-                  <div className="p-4 rounded-2xl bg-[#F5F4FF] border border-[#E6E7F0] text-xs font-mono text-[#10183A] whitespace-pre-wrap h-80 overflow-y-auto">
-                    {origContent}
-                  </div>
-                </div>
-
-                <div>
-                  <span className="text-xs font-bold text-[#6366F1] block mb-2">Enhanced & Optimized Version:</span>
-                  <div className="p-4 rounded-2xl bg-[#0B1025] border border-[#252B49] text-xs font-mono text-[#C6C9DC] whitespace-pre-wrap h-80 overflow-y-auto">
-                    {improvementResult.improvedMarkdown}
-                  </div>
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-[#6366F1]">
+                    Editing Active Article • {selectedArticle.id}
+                  </span>
+                  <h3 className="text-lg font-bold text-[#10183A]">{selectedArticle.title}</h3>
                 </div>
               </div>
 
-              <div className="p-4 rounded-2xl bg-[#F5F4FF] border border-[#E8E7FF] space-y-2">
-                <span className="text-xs font-bold text-[#10183A]">Specific SEO Upgrades Applied:</span>
-                <ul className="list-disc list-inside text-xs text-[#626985] space-y-1">
-                  {improvementResult.changesMade?.map((c: string, idx: number) => (
-                    <li key={idx}>{c}</li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="flex justify-end">
-                <button
-                  onClick={() => {
-                    setHeadline(origTitle);
-                    setDraftResult({
-                      title: origTitle,
-                      slug: origTitle.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
-                      metaDescription: `Improved guide on ${origTitle}`,
-                      contentMarkdown: improvementResult.improvedMarkdown,
-                      modelUsed: "Gemini Optimization",
-                    });
-                    setDraftArticleId(`art-${Date.now()}`);
-                    setActiveTab("create");
-                  }}
-                  className="px-6 py-2.5 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-[#6366F1] to-[#8067FF] cursor-pointer"
-                >
-                  Load into Rich SEO Editor &rarr;
-                </button>
-              </div>
+              <RichArticleEditor
+                key={selectedArticle.id}
+                articleId={selectedArticle.id}
+                initialTitle={selectedArticle.title}
+                initialSlug={selectedArticle.slug}
+                initialMetaDescription={selectedArticle.meta_description}
+                initialContent={selectedArticle.content_markdown}
+                initialKeyword={selectedArticle.primary_keyword || ""}
+                initialCategory={selectedArticle.category || "Technical SEO"}
+                initialStatus={selectedArticle.status}
+                initialScheduledDate={selectedArticle.scheduled_date || ""}
+              />
             </div>
           )}
         </div>
@@ -395,7 +376,7 @@ export default function AiDraftingDeskPage() {
       fallback={
         <div className="p-12 text-center text-sm text-[#626985] flex items-center justify-center gap-2">
           <Loader2 className="w-5 h-5 animate-spin text-[#6366F1]" />
-          <span>Loading Drafting Workspace...</span>
+          <span>Loading Studio Workspace...</span>
         </div>
       }
     >

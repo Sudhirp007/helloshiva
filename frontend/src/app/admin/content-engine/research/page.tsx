@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Search, Sparkles, Loader2, Plus, ArrowRight, CheckCircle2, Layers } from "lucide-react";
 
 export default function SeoResearchDeskPage() {
+  const router = useRouter();
   const [seed, setSeed] = useState("technical seo");
   const [loading, setLoading] = useState(false);
   const [opportunities, setOpportunities] = useState<any[]>([]);
@@ -149,24 +151,20 @@ export default function SeoResearchDeskPage() {
                 <div className="pt-3 border-t border-[#E6E7F0] flex items-center justify-between text-xs">
                   <span className="text-[11px] text-[#626985]">{opp.research_source}</span>
                   <button
-                    onClick={() => setAddedIds({ ...addedIds, [opp.id]: true })}
-                    className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                      addedIds[opp.id]
-                        ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                        : "bg-[#F5F4FF] text-[#6366F1] hover:bg-[#E8E7FF]"
-                    }`}
+                    onClick={() => {
+                      const params = new URLSearchParams({
+                        headline: opp.suggested_title,
+                        primaryKeyword: opp.keyword,
+                        theme: opp.topic_cluster,
+                        targetAudience: "Digital Marketers, Founders, and CTOs",
+                        suggestedCta: "Book a Strategic SEO Architecture Audit with HelloShiva",
+                      });
+                      router.push(`/admin/content-engine/drafting?${params.toString()}`);
+                    }}
+                    className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#6366F1] to-[#8067FF] hover:opacity-90 shadow-xs cursor-pointer transition-all"
                   >
-                    {addedIds[opp.id] ? (
-                      <>
-                        <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>Planned in Calendar</span>
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>Add to Calendar</span>
-                      </>
-                    )}
+                    <span>Draft & Edit Article</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
