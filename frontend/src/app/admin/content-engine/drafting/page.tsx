@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   FileEdit,
@@ -191,6 +192,30 @@ function AiDraftingDeskInner() {
         <p className="text-sm text-[#626985]">
           Generate 1,000–1,500 word commercial drafts from SEO research, edit with full formatting and callouts, and verify quantitative metrics live before publishing or scheduling.
         </p>
+      </div>
+
+      {/* Flagship Content Studio Shortcut Card */}
+      <div className="p-4 rounded-2xl bg-gradient-to-r from-[#0B1025] to-[#171F42] border border-[#252B49] text-white flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-md">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-[#6366F1] to-[#8067FF] flex items-center justify-center text-white shrink-0">
+            <Sparkles className="w-5 h-5" />
+          </div>
+          <div>
+            <h4 className="text-sm font-bold text-white">
+              ROI-On-Property Inspired Content Studio Available
+            </h4>
+            <p className="text-xs text-[#C6C9DC]">
+              Unified 4-stage pipeline: 7-Day Calendar &rarr; Keyword &amp; Competitor Lab &rarr; AI Studio &amp; Live OpenSEO Scoring &rarr; 5-Channel Social Dispatch.
+            </p>
+          </div>
+        </div>
+        <Link
+          href="/admin/content-studio"
+          className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#6366F1] to-[#8067FF] hover:opacity-90 transition-opacity shrink-0 flex items-center gap-1.5 shadow-md shadow-indigo-500/25"
+        >
+          <span>Open Full Content Studio</span>
+          <ArrowRight className="w-3.5 h-3.5" />
+        </Link>
       </div>
 
       {/* Workflow Tabs */}

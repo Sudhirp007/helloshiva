@@ -159,7 +159,7 @@ export default function SeoResearchDeskPage() {
                         targetAudience: "Digital Marketers, Founders, and CTOs",
                         suggestedCta: "Book a Strategic SEO Architecture Audit with HelloShiva",
                       });
-                      router.push(`/admin/content-engine/drafting?${params.toString()}`);
+                      router.push(`/admin/content-studio?${params.toString()}`);
                     }}
                     className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#6366F1] to-[#8067FF] hover:opacity-90 shadow-xs cursor-pointer transition-all"
                   >
