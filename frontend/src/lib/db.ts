@@ -7,11 +7,18 @@ interface TableData {
   lead_followups: any[];
   feature_flags: any[];
   keyword_opportunities: any[];
+  topic_clusters: any[];
+  content_briefs: any[];
   editorial_calendar: any[];
   articles: any[];
   article_versions: any[];
+  article_sources: any[];
   seo_audits: any[];
   social_posts: any[];
+  social_campaigns: any[];
+  offpage_opportunities: any[];
+  content_analytics: any[];
+  lead_attributions: any[];
   content_activity_logs: any[];
   integration_settings: any[];
   admin_users: any[];
@@ -45,11 +52,18 @@ class JsonDatabase {
           lead_followups: parsed.lead_followups || [],
           feature_flags: parsed.feature_flags || [],
           keyword_opportunities: parsed.keyword_opportunities || [],
+          topic_clusters: parsed.topic_clusters || [],
+          content_briefs: parsed.content_briefs || [],
           editorial_calendar: parsed.editorial_calendar || [],
           articles: parsed.articles || [],
           article_versions: parsed.article_versions || [],
+          article_sources: parsed.article_sources || [],
           seo_audits: parsed.seo_audits || [],
           social_posts: parsed.social_posts || [],
+          social_campaigns: parsed.social_campaigns || [],
+          offpage_opportunities: parsed.offpage_opportunities || [],
+          content_analytics: parsed.content_analytics || [],
+          lead_attributions: parsed.lead_attributions || [],
           content_activity_logs: parsed.content_activity_logs || [],
           integration_settings: parsed.integration_settings || [],
           admin_users: parsed.admin_users || [],
@@ -65,11 +79,18 @@ class JsonDatabase {
       lead_followups: [],
       feature_flags: [],
       keyword_opportunities: [],
+      topic_clusters: [],
+      content_briefs: [],
       editorial_calendar: [],
       articles: [],
       article_versions: [],
+      article_sources: [],
       seo_audits: [],
       social_posts: [],
+      social_campaigns: [],
+      offpage_opportunities: [],
+      content_analytics: [],
+      lead_attributions: [],
       content_activity_logs: [],
       integration_settings: [],
       admin_users: [],

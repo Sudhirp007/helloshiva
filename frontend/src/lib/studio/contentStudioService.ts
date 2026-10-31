@@ -128,12 +128,14 @@ export class ContentStudioService {
   }
 
   private getModelName(modelOverride?: string): string {
-    if (modelOverride) return modelOverride;
+    if (modelOverride && !modelOverride.includes("1.5")) return modelOverride;
     try {
       const row = db.prepare("SELECT value FROM integration_settings WHERE key = 'GEMINI_MODEL'").get() as { value: string } | undefined;
-      return row?.value || process.env.GEMINI_MODEL || "gemini-2.0-flash";
+      const model = row?.value || process.env.GEMINI_MODEL || "gemini-3.5-flash";
+      if (model.includes("1.5")) return "gemini-3.5-flash";
+      return model;
     } catch {
-      return "gemini-2.0-flash";
+      return "gemini-3.5-flash";
     }
   }
 
@@ -142,45 +144,56 @@ export class ContentStudioService {
   }
 
   /**
-   * Helper to invoke Gemini API and parse JSON cleanly.
+   * Helper to invoke Gemini API and parse JSON cleanly with multi-model resilience.
    */
   private async callGeminiJson<T>(prompt: string, modelOverride?: string): Promise<T | null> {
     const apiKey = this.getApiKey();
     if (!apiKey) return null;
 
-    const model = this.getModelName(modelOverride);
-    const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+    const baseModel = this.getModelName(modelOverride);
+    const candidateModels = Array.from(
+      new Set([baseModel, "gemini-3.5-flash", "gemini-3.6-flash", "gemini-flash-latest", "gemini-pro-latest"])
+    ).filter((m) => !m.includes("1.5"));
 
-    const res = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        contents: [{ parts: [{ text: prompt }] }],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 4000,
-          responseMimeType: "application/json",
-        },
-      }),
-    });
+    for (const model of candidateModels) {
+      try {
+        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
 
-    if (!res.ok) {
-      const errText = await res.text();
-      console.warn("Gemini API call failed:", res.status, errText);
-      return null;
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: prompt }] }],
+            generationConfig: {
+              temperature: 0.7,
+              maxOutputTokens: 3000,
+              responseMimeType: "application/json",
+            },
+          }),
+        });
+
+        if (!res.ok) {
+          const errText = await res.text();
+          console.warn(`Gemini API call failed for model ${model}:`, res.status, errText);
+          continue;
+        }
+
+        const data = await res.json();
+        const parts = data.candidates?.[0]?.content?.parts || [];
+        const rawText = parts.map((p: any) => p.text).filter(Boolean).join("");
+        if (!rawText) continue;
+
+        try {
+          return JSON.parse(rawText) as T;
+        } catch {
+          const cleaned = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
+          return JSON.parse(cleaned) as T;
+        }
+      } catch (err) {
+        console.warn(`Error invoking Gemini model ${model}:`, err);
+      }
     }
-
-    const data = await res.json();
-    const rawText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!rawText) return null;
-
-    try {
-      return JSON.parse(rawText) as T;
-    } catch {
-      // Fallback clean markdown block
-      const cleaned = rawText.replace(/```json/g, "").replace(/```/g, "").trim();
-      return JSON.parse(cleaned) as T;
-    }
+    return null;
   }
 
   /**
@@ -490,38 +503,55 @@ CRITICAL EDITORIAL & HUMANIZATION RULES:
 4. FAQ: Include a dedicated "## Frequently Asked Questions" section with 3 distinct questions and comprehensive, direct answers.
 5. CTA: Conclude with an executive strategic action summary encouraging readers to discuss their digital roadmap with HelloShiva.`;
 
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${this.getApiKey()}`;
-        const res = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.65, maxOutputTokens: 4000 },
-          }),
-        });
+        const candidateModels = Array.from(
+          new Set([model, "gemini-3.5-flash", "gemini-3.6-flash", "gemini-flash-latest", "gemini-pro-latest"])
+        ).filter((m) => !m.includes("1.5"));
 
-        if (res.ok) {
-          const data = await res.json();
-          let generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (generatedText) {
-            generatedText = generatedText
-              .replace(/^#\s+[^\n]+\n+/, "")
-              .replace(/\n---\n/g, "\n\n")
-              .trim();
+        for (const candidateModel of candidateModels) {
+          try {
+            const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${candidateModel}:generateContent?key=${this.getApiKey()}`;
+            const res = await fetch(endpoint, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                contents: [{ parts: [{ text: prompt }] }],
+                generationConfig: { temperature: 0.7, maxOutputTokens: 3000 },
+              }),
+            });
 
-            const wordCount = generatedText.split(/\s+/).filter(Boolean).length;
-            const readTime = `${Math.max(1, Math.ceil(wordCount / 225))} min read`;
+            if (res.ok) {
+              const data = await res.json();
+              const parts = data.candidates?.[0]?.content?.parts || [];
+              let generatedText = parts
+                .map((p: any) => p.text)
+                .filter(Boolean)
+                .join("\n");
 
-            return {
-              title: `The 2026 Strategic Blueprint: How to Master ${keywords.charAt(0).toUpperCase() + keywords.slice(1)}`,
-              slug,
-              category: "Market Insights",
-              excerpt: `Master ${keywords} with HelloShiva's strategic blueprint. Actionable technical frameworks, attribution clarity, and commercial scaling strategies.`,
-              content: generatedText,
-              read_time: readTime,
-              canonical_url: `https://helloshiva.com/blog/${slug}`,
-              model_used: `Google ${model} (Live AI Engine)`,
-            };
+              if (generatedText && generatedText.trim().length > 200) {
+                generatedText = generatedText
+                  .replace(/^#\s+[^\n]+\n+/, "")
+                  .replace(/\n---\n/g, "\n\n")
+                  .trim();
+
+                const wordCount = generatedText.split(/\s+/).filter(Boolean).length;
+                const readTime = `${Math.max(1, Math.ceil(wordCount / 225))} min read`;
+
+                return {
+                  title: `The 2026 Strategic Blueprint: How to Master ${keywords.charAt(0).toUpperCase() + keywords.slice(1)}`,
+                  slug,
+                  category: "Market Insights",
+                  excerpt: `Master ${keywords} with HelloShiva's strategic blueprint. Actionable technical frameworks, attribution clarity, and commercial scaling strategies.`,
+                  content: generatedText,
+                  read_time: readTime,
+                  canonical_url: `https://helloshiva.com/blog/${slug}`,
+                  model_used: `Google ${candidateModel} (Live AI Engine)`,
+                };
+              }
+            } else {
+              console.warn(`Model ${candidateModel} returned HTTP ${res.status}. Trying next available model...`);
+            }
+          } catch (mErr) {
+            console.warn(`Error invoking Gemini model ${candidateModel}:`, mErr);
           }
         }
       } catch (err) {

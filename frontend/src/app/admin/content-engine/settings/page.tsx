@@ -6,7 +6,7 @@ import { Settings, Sparkles, Save, CheckCircle2, Lock, ShieldCheck, Key, Cpu } f
 export default function ContentEngineSettingsPage() {
   const [flags, setFlags] = useState<any[]>([]);
   const [geminiKey, setGeminiKey] = useState("");
-  const [geminiModel, setGeminiModel] = useState("gemini-1.5-flash");
+  const [geminiModel, setGeminiModel] = useState("gemini-3.5-flash");
   const [saved, setSaved] = useState(false);
   const [loading, setLoading] = useState(true);
 
@@ -107,9 +107,10 @@ export default function ContentEngineSettingsPage() {
                 onChange={(e) => setGeminiModel(e.target.value)}
                 className="w-full px-3 py-2 rounded-xl border border-[#E6E7F0] text-xs font-semibold text-[#10183A] bg-white focus:outline-none focus:border-[#6366F1]"
               >
-                <option value="gemini-1.5-flash">gemini-1.5-flash (Fast & Cost-Efficient - Default)</option>
-                <option value="gemini-2.0-flash">gemini-2.0-flash (Next-Gen High Speed)</option>
-                <option value="gemini-1.5-pro">gemini-1.5-pro (Deep Reasoning & Long Form)</option>
+                <option value="gemini-3.5-flash">Google Gemini 3.5 Flash (Fast, High Reasoning - Recommended Default)</option>
+                <option value="gemini-3.6-flash">Google Gemini 3.6 Flash (Advanced Reasoning & Deep Generation)</option>
+                <option value="gemini-flash-latest">Google Gemini Flash Latest (Auto-updated Stable Flash)</option>
+                <option value="gemini-pro-latest">Google Gemini Pro Latest (Enterprise Long-Form Pro)</option>
               </select>
             </div>
           </div>

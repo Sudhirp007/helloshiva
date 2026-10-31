@@ -76,7 +76,7 @@ function ContentStudioInner() {
 
   // Global Engine Status
   const [isAiAvailable, setIsAiAvailable] = useState(false);
-  const [selectedModel, setSelectedModel] = useState("gemini-2.0-flash");
+  const [selectedModel, setSelectedModel] = useState("gemini-3.5-flash");
 
   // Tab 1: Calendar State
   const [calMarket, setCalMarket] = useState("Global Remote & India B2B");
@@ -557,7 +557,7 @@ function ContentStudioInner() {
             {isAiAvailable ? (
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
                 <CheckCircle2 className="w-3.5 h-3.5" />
-                <span>Gemini 2.0 Flash Active</span>
+                <span>Gemini 3.5 Flash Active</span>
               </span>
             ) : (
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold bg-[#8067FF]/15 text-[#8067FF] border border-[#8067FF]/30">

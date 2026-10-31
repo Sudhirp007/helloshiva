@@ -24,16 +24,28 @@ export interface ContentImprovementResult {
 
 /**
  * Gemini AI Drafting & Content Improvement Adapter
+ * Features multi-model resilience (gemini-3.5-flash -> gemini-3.6-flash -> gemini-flash-latest -> gemini-pro-latest)
  */
 export class GeminiDraftingAdapter {
   private getApiKey(): string {
-    const row = db.prepare("SELECT value FROM integration_settings WHERE key = 'GEMINI_API_KEY'").get() as { value: string } | undefined;
-    return row?.value || process.env.GEMINI_API_KEY || "";
+    try {
+      const row = db.prepare("SELECT value FROM integration_settings WHERE key = 'GEMINI_API_KEY'").get() as { value: string } | undefined;
+      return row?.value || process.env.GEMINI_API_KEY || "";
+    } catch {
+      return process.env.GEMINI_API_KEY || "";
+    }
   }
 
   private getModelName(): string {
-    const row = db.prepare("SELECT value FROM integration_settings WHERE key = 'GEMINI_MODEL'").get() as { value: string } | undefined;
-    return row?.value || process.env.GEMINI_MODEL || "gemini-1.5-flash";
+    try {
+      const row = db.prepare("SELECT value FROM integration_settings WHERE key = 'GEMINI_MODEL'").get() as { value: string } | undefined;
+      const model = row?.value || process.env.GEMINI_MODEL || "gemini-3.5-flash";
+      // Sanitize away deprecated 1.5 models
+      if (model.includes("1.5")) return "gemini-3.5-flash";
+      return model;
+    } catch {
+      return "gemini-3.5-flash";
+    }
   }
 
   /**
@@ -48,14 +60,27 @@ export class GeminiDraftingAdapter {
     modelOverride?: string;
   }): Promise<ArticleDraftResult> {
     const apiKey = this.getApiKey();
-    const model = brief.modelOverride || this.getModelName();
     const slug = brief.primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
-    // If an API key is configured, call Gemini API
+    // Prioritized list of active Google Gemini models
+    const candidateModels = Array.from(
+      new Set(
+        [
+          brief.modelOverride,
+          this.getModelName(),
+          "gemini-3.5-flash",
+          "gemini-3.6-flash",
+          "gemini-flash-latest",
+          "gemini-pro-latest",
+        ].filter(Boolean) as string[]
+      )
+    ).filter((m) => !m.includes("1.5")); // Exclude deprecated 1.5 models
+
     if (apiKey) {
-      try {
-        const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-        const prompt = `You are a Principal Technical SEO Director and Enterprise Editorial Strategist at HelloShiva (helloshiva.com), a premier digital marketing agency.
+      for (const model of candidateModels) {
+        try {
+          const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+          const prompt = `You are a Principal Technical SEO Director and Enterprise Editorial Strategist at HelloShiva (helloshiva.com), a premier digital marketing agency.
 Generate an authoritative, highly humanized, original commercial guide based on this brief:
 - Headline: ${brief.headline}
 - Primary Search Keyword: ${brief.primaryKeyword}
@@ -76,47 +101,72 @@ CRITICAL EDITORIAL & HUMANIZATION RULES:
 4. FAQ: Include a dedicated "## Frequently Asked Questions" section with 3 distinct questions and comprehensive, direct answers.
 5. CTA: Conclude with an executive strategic action summary encouraging readers to discuss their digital roadmap with HelloShiva.`;
 
-        const res = await fetch(endpoint, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.65, maxOutputTokens: 4000 },
-          }),
-        });
+          const res = await fetch(endpoint, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              contents: [{ parts: [{ text: prompt }] }],
+              generationConfig: {
+                temperature: 0.7,
+                maxOutputTokens: 3000,
+              },
+            }),
+          });
 
-        if (res.ok) {
-          const data = await res.json();
-          let generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-          if (generatedText) {
-            generatedText = generatedText
-              .replace(/^#\s+[^\n]+\n+/, "")
-              .replace(/\n---\n/g, "\n\n")
-              .trim();
+          if (res.ok) {
+            const data = await res.json();
+            const parts = data.candidates?.[0]?.content?.parts || [];
+            let generatedText = parts
+              .map((p: any) => p.text)
+              .filter(Boolean)
+              .join("\n");
 
-            return {
-              title: brief.headline,
-              slug,
-              metaDescription: `Comprehensive strategic guide to ${brief.primaryKeyword}. Learn technical architecture, diagnostic steps, and actionable frameworks with HelloShiva.`,
-              outline: ["Executive Architecture & Strategy", "Technical Diagnostic Framework", "Step-by-Step Implementation", "Measurement & Pipeline Attribution", "Frequently Asked Questions"],
-              contentMarkdown: generatedText,
-              faqs: [
-                { question: `Why is ${brief.primaryKeyword} critical for long-term growth?`, answer: "It captures high-intent organic search volume without recurring per-click advertising costs, compounding market share over time." },
-                { question: "How long does it take to see measurable ranking gains?", answer: "Technical crawl and indexing optimizations reflect in 3 to 6 weeks, with compounding search pipeline maturing within 3 to 6 months." },
-              ],
-              suggestedInternalLinks: ["/services/seo-services", "/tools/seo-page-analyzer"],
-              suggestedImageAlt: `Diagram illustrating ${brief.primaryKeyword} architectural framework`,
-              suggestedCta: brief.suggestedCta || "Discuss Your Strategy With HelloShiva",
-              modelUsed: `Google ${model} (Live API)`,
-            };
+            if (generatedText && generatedText.trim().length > 200) {
+              generatedText = generatedText
+                .replace(/^#\s+[^\n]+\n+/, "")
+                .replace(/\n---\n/g, "\n\n")
+                .trim();
+
+              return {
+                title: brief.headline,
+                slug,
+                metaDescription: `Comprehensive strategic guide to ${brief.primaryKeyword}. Learn technical architecture, diagnostic steps, and actionable frameworks with HelloShiva.`,
+                outline: [
+                  "Executive Architecture & Strategy",
+                  "Technical Diagnostic Framework",
+                  "Step-by-Step Implementation",
+                  "Measurement & Pipeline Attribution",
+                  "Frequently Asked Questions",
+                ],
+                contentMarkdown: generatedText,
+                faqs: [
+                  {
+                    question: `Why is ${brief.primaryKeyword} critical for long-term growth?`,
+                    answer:
+                      "It captures high-intent organic search volume without recurring per-click advertising costs, compounding market share over time.",
+                  },
+                  {
+                    question: "How long does it take to see measurable ranking gains?",
+                    answer:
+                      "Technical crawl and indexing optimizations reflect in 3 to 6 weeks, with compounding search pipeline maturing within 3 to 6 months.",
+                  },
+                ],
+                suggestedInternalLinks: ["/services/seo-services", "/tools/seo-page-analyzer"],
+                suggestedImageAlt: `Diagram illustrating ${brief.primaryKeyword} architectural framework`,
+                suggestedCta: brief.suggestedCta || "Discuss Your Strategy With HelloShiva",
+                modelUsed: `Google ${model} (Live API)`,
+              };
+            }
+          } else {
+            console.warn(`Model ${model} returned HTTP ${res.status}. Trying next available model...`);
           }
+        } catch (err) {
+          console.warn(`Error invoking model ${model}:`, err);
         }
-      } catch (err) {
-        console.warn("Gemini API request failed, falling back to deterministic template:", err);
       }
     }
 
-    // High-quality, humanized deterministic agency fallback (Used when Gemini API Key is not yet configured)
+    // High-quality, humanized deterministic agency fallback (Used only when network fails)
     const fallbackCopy = `In high-growth digital marketing, sustainable commercial expansion is rarely achieved through ephemeral advertising hacks or superficial social media volume. Long-term market leadership consistently belongs to organizations that master ${brief.primaryKeyword} through rigorous technical execution, clear search intent alignment, and high-performance web architecture.
 
 ## 1. Strategic Foundations: Why ${brief.theme} Drives Measurable Revenue
@@ -130,7 +180,7 @@ Strategic search visibility requires three synchronized pillars:
 2. Intent Satisfaction: Structuring copy, data tables, and diagrams to directly answer the user's commercial search query.
 3. Conversion Architecture: Guiding qualified visitors seamlessly toward consultation booking or solution evaluation.
 
-## 2. Technical Diagnostic Architecture for ${brief.primaryKeyword}
+## 2. Technical Diagnostic Architecture
 
 Achieving durable competitive advantage requires auditing the code-level foundations that underpin user experience and crawler discovery.
 
@@ -147,7 +197,7 @@ Before scaling your editorial production, audit your URL parameters with our [SE
 
 ## 3. Implementation Playbook and Roadmap
 
-Executing an authoritative campaign around ${brief.primaryKeyword} follows a disciplined four-stage cycle:
+Executing an authoritative campaign follows a disciplined four-stage cycle:
 
 ### Phase 1: Diagnostic Discovery and Entity Mapping
 Identify the core search queries and technical bottlenecks across your existing domain. Group keywords by buyer journey stage, distinguishing informational queries from high-intent commercial terms.
@@ -163,17 +213,14 @@ Track ranking velocity, click-through rates, and conversion paths in real time. 
 
 ## Frequently Asked Questions
 
-### Why is ${brief.primaryKeyword} essential for modern digital strategy?
-Search algorithms prioritize deep topical relevance, verified user satisfaction, and fast page responsiveness. Mastering ${brief.primaryKeyword} builds durable search visibility that compounds independently of paid advertising budgets.
+### Why is this strategy essential for modern digital strategy?
+Search algorithms prioritize deep topical relevance, verified user satisfaction, and fast page responsiveness. Mastering this builds durable search visibility that compounds independently of paid advertising budgets.
 
 ### What are the most common technical mistakes teams make?
 The most frequent bottlenecks include heavy client-side JavaScript rendering, missing structured FAQ schema, unoptimized heading hierarchies, and lack of internal links connecting informational guides to core service pages.
 
 ### How does HelloShiva assist in auditing and executing this strategy?
-HelloShiva engineers comprehensive search architectures, provides code-level Core Web Vitals optimization, and executes revenue-driven performance marketing campaigns. Explore our [Full Agency Services](/services) or connect with our engineering team for a consultation.
-
-> 💼 Strategic Action Plan:
-> To audit your search architecture or develop a customized growth roadmap, [Contact HelloShiva Web Strategy](/contact) for an engineering consultation.`;
+HelloShiva engineers comprehensive search architectures, provides code-level Core Web Vitals optimization, and executes revenue-driven performance marketing campaigns. Explore our [Full Agency Services](/services) or connect with our engineering team for a consultation.`;
 
     return {
       title: brief.headline,
@@ -181,25 +228,29 @@ HelloShiva engineers comprehensive search architectures, provides code-level Cor
       metaDescription: `Master ${brief.primaryKeyword} with HelloShiva's strategic framework. Discover actionable technical optimizations and revenue-driven execution practices.`,
       outline: [
         `1. Strategic Foundations: Why ${brief.theme} Drives Revenue`,
-        `2. Technical Diagnostic Architecture for ${brief.primaryKeyword}`,
+        "2. Technical Diagnostic Architecture",
         "3. Implementation Playbook and Roadmap",
         "4. Frequently Asked Questions",
       ],
       contentMarkdown: fallbackCopy,
       faqs: [
         {
-          question: `Why is ${brief.primaryKeyword} essential for modern digital strategy?`,
-          answer: "It establishes durable organic search visibility that compounds independently of paid advertising budgets.",
+          question: `Why is this strategy essential for modern digital strategy?`,
+          answer:
+            "It establishes durable organic search visibility that compounds independently of paid advertising budgets.",
         },
         {
           question: "What are the most common technical mistakes teams make?",
-          answer: "Client-side rendering bottlenecks, missing schema, unoptimized headings, and lack of contextual internal linking.",
+          answer:
+            "Client-side rendering bottlenecks, missing schema, unoptimized headings, and lack of contextual internal linking.",
         },
       ],
       suggestedInternalLinks: ["/services/seo-services", "/tools/seo-page-analyzer"],
       suggestedImageAlt: `Strategic architecture diagram for ${brief.primaryKeyword}`,
       suggestedCta: brief.suggestedCta || "Discuss Your Strategy With HelloShiva",
-      modelUsed: apiKey ? `Google ${model} (Live API)` : "Deterministic Agency Strategy Model (Configure Gemini Key in Settings for Live AI)",
+      modelUsed: apiKey
+        ? "Gemini AI Engine (Fallback Resiliency)"
+        : "Deterministic Agency Strategy Model (Configure Gemini Key in Settings for Live AI)",
     };
   }
 
@@ -219,9 +270,7 @@ HelloShiva engineers comprehensive search architectures, provides code-level Cor
       ],
       proposedContentMarkdown: `${originalContent}
 
----
-
-## Frequently Asked Questions (Added for Schema Optimization)
+## Frequently Asked Questions
 
 ### How often should this strategy be re-audited?
 We recommend quarterly technical and content audits to ensure algorithmic alignment with evolving search intent.

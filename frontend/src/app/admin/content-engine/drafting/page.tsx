@@ -25,7 +25,7 @@ function AiDraftingDeskInner() {
   const [activeTab, setActiveTab] = useState<"create" | "improve">("create");
 
   // AI Configuration State
-  const [selectedModel, setSelectedModel] = useState("gemini-2.0-flash");
+  const [selectedModel, setSelectedModel] = useState("gemini-3.5-flash");
   const [apiKeyConfigured, setApiKeyConfigured] = useState(false);
   const [showKeyInput, setShowKeyInput] = useState(false);
   const [inputKey, setInputKey] = useState("");
@@ -322,9 +322,10 @@ function AiDraftingDeskInner() {
                   onChange={(e) => setSelectedModel(e.target.value)}
                   className="w-full px-3.5 py-2.5 rounded-xl bg-[#0B1025] border border-[#252B49] text-xs text-white focus:outline-none focus:border-[#6366F1]"
                 >
-                  <option value="gemini-2.0-flash">Google Gemini 2.0 Flash (Recommended — Flagship Speed & Reasoning)</option>
-                  <option value="gemini-1.5-pro">Google Gemini 1.5 Pro (Deep Topical Reasoning & Architectural Depth)</option>
-                  <option value="gemini-1.5-flash">Google Gemini 1.5 Flash (Lightweight & Rapid)</option>
+                  <option value="gemini-3.5-flash">Google Gemini 3.5 Flash (Recommended — Flagship Speed & Reasoning)</option>
+                  <option value="gemini-3.6-flash">Google Gemini 3.6 Flash (Advanced Architecture & Deep Reasoning)</option>
+                  <option value="gemini-flash-latest">Google Gemini Flash Latest (Stable Auto-updated)</option>
+                  <option value="gemini-pro-latest">Google Gemini Pro Latest (Long-Form Architectural Depth)</option>
                 </select>
               </div>
 
