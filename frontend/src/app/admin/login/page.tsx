@@ -7,8 +7,8 @@ import { Lock, Mail, Key, ShieldCheck, ArrowRight, Loader2, AlertCircle } from "
 
 export default function AdminLoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState("admin@helloshiva.com");
-  const [password, setPassword] = useState("admin");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -133,13 +133,6 @@ export default function AdminLoginPage() {
               </button>
             </div>
           </form>
-
-          {/* Credentials helper hint */}
-          <div className="p-3.5 rounded-2xl bg-[#0B1025] border border-[#252B49] text-[11px] text-[#C6C9DC]/70 space-y-1">
-            <div className="font-semibold text-white">Default Agency Admin Access:</div>
-            <div>Email: <code className="text-[#8067FF]">admin@helloshiva.com</code></div>
-            <div>Password: <code className="text-[#8067FF]">admin</code></div>
-          </div>
         </div>
 
         <div className="text-center">

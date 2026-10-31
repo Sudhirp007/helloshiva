@@ -35,6 +35,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { defaultOpenSeoAuditAdapter, OpenSeoAuditResult } from "@/lib/research/openSeoAuditAdapter";
+import MarkdownRenderer from "@/components/MarkdownRenderer";
 
 interface RichArticleEditorProps {
   articleId: string;
@@ -797,9 +798,7 @@ export default function RichArticleEditor({
                 </label>
                 <div className="h-[490px] overflow-y-auto px-6 py-5 rounded-2xl border border-[#E6E7F0] bg-[#FAF9FF] text-xs leading-relaxed text-[#10183A] space-y-4">
                   <h1 className="text-xl font-extrabold text-[#10183A]">{title || "Untitled Article"}</h1>
-                  <div className="whitespace-pre-wrap font-sans text-xs text-[#333E63]">
-                    {contentMarkdown}
-                  </div>
+                  <MarkdownRenderer content={contentMarkdown} />
                 </div>
               </div>
             </div>
@@ -832,8 +831,8 @@ export default function RichArticleEditor({
                 <h1 className="text-3xl font-black text-[#10183A] leading-tight">{title}</h1>
                 <p className="text-sm text-[#626985] italic">{metaDescription}</p>
               </div>
-              <div className="whitespace-pre-wrap font-sans text-sm text-[#10183A] leading-relaxed">
-                {contentMarkdown}
+              <div className="space-y-6">
+                <MarkdownRenderer content={contentMarkdown} />
               </div>
             </div>
           )}

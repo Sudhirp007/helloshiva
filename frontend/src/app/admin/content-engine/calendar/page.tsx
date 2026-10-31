@@ -38,6 +38,37 @@ export default function EditorialCalendarPage() {
     loadArticles();
   }, []);
 
+  const formatCalendarDateTime = (dateStr?: string) => {
+    if (!dateStr) return "Date not set";
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleString("en-US", {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const toDatetimeLocal = (dateStr?: string) => {
+    if (!dateStr) return "";
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return "";
+      const pad = (n: number) => n.toString().padStart(2, "0");
+      return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+    } catch {
+      return "";
+    }
+  };
+
   const handleUpdateScheduleDate = async (articleId: string, newDate: string) => {
     setUpdatingId(articleId);
     try {
@@ -143,9 +174,9 @@ export default function EditorialCalendarPage() {
               >
                 <div className="space-y-1.5 max-w-2xl">
                   <div className="flex flex-wrap items-center gap-2.5">
-                    <span className="text-xs font-bold text-blue-700 bg-blue-50 px-2.5 py-1 rounded-lg border border-blue-200 flex items-center gap-1.5">
-                      <CalendarIcon className="w-3.5 h-3.5" />
-                      <span>{art.scheduled_date || "Date not set"}</span>
+                    <span className="text-xs font-bold text-blue-700 bg-blue-50 px-3 py-1.5 rounded-xl border border-blue-200 flex items-center gap-1.5 shadow-xs">
+                      <Clock className="w-3.5 h-3.5 text-blue-600" />
+                      <span>{formatCalendarDateTime(art.scheduled_date)}</span>
                     </span>
                     <span className="font-bold text-sm text-[#10183A]">{art.title}</span>
                   </div>
@@ -158,14 +189,18 @@ export default function EditorialCalendarPage() {
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                  {/* Reschedule Date Picker */}
+                  {/* Reschedule Date & Time Picker */}
                   <div className="flex items-center gap-1.5">
-                    <span className="text-[11px] text-[#626985]">Reschedule:</span>
+                    <span className="text-[11px] font-semibold text-[#626985]">Reschedule:</span>
                     <input
-                      type="date"
-                      defaultValue={art.scheduled_date || ""}
-                      onChange={(e) => handleUpdateScheduleDate(art.id, e.target.value)}
-                      className="px-2.5 py-1.5 rounded-lg border border-[#E6E7F0] text-xs font-mono text-[#10183A]"
+                      type="datetime-local"
+                      defaultValue={toDatetimeLocal(art.scheduled_date)}
+                      onChange={(e) => {
+                        if (e.target.value) {
+                          handleUpdateScheduleDate(art.id, new Date(e.target.value).toISOString());
+                        }
+                      }}
+                      className="px-2.5 py-1.5 rounded-xl border border-[#E6E7F0] text-xs font-mono text-[#10183A] bg-white focus:outline-none focus:border-[#6366F1]"
                     />
                   </div>
 

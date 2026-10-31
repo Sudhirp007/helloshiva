@@ -9,6 +9,7 @@ import { Menu, X, ArrowRight, Sparkles, ChevronDown } from "lucide-react";
 export default function Header() {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
@@ -16,8 +17,14 @@ export default function Header() {
       setScrolled(window.scrollY > 20);
     };
     window.addEventListener("scroll", handleScroll);
+
+    // Check if user has active admin session
+    if (typeof window !== "undefined") {
+      setIsAdmin(localStorage.getItem("helloshiva_admin_auth") === "true");
+    }
+
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [pathname]);
 
   // Close mobile drawer on route change
   useEffect(() => {
@@ -76,6 +83,14 @@ export default function Header() {
 
           {/* Header Action CTA */}
           <div className="hidden md:flex items-center gap-3">
+            {isAdmin && (
+              <Link
+                href="/admin/content-engine/overview"
+                className="px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#6366F1] to-[#8067FF] hover:opacity-90 shadow-md shadow-indigo-500/25 flex items-center gap-1.5 transition-all"
+              >
+                <span>⚡ Admin Command Center</span>
+              </Link>
+            )}
             <Link
               href="/tools"
               className="px-3.5 py-2 rounded-lg text-xs font-semibold text-[#C6C9DC] hover:text-white transition-colors flex items-center gap-1.5"
@@ -122,6 +137,14 @@ export default function Header() {
             </Link>
           ))}
           <div className="pt-4 border-t border-[#252B49] flex flex-col gap-2.5">
+            {isAdmin && (
+              <Link
+                href="/admin/content-engine/overview"
+                className="w-full text-center py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#6366F1] to-[#8067FF]"
+              >
+                ⚡ Return to Admin Command Center
+              </Link>
+            )}
             <Link
               href="/tools"
               className="w-full text-center py-2.5 rounded-lg text-sm font-semibold text-[#C6C9DC] bg-[#171F42] border border-[#252B49]"

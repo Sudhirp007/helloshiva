@@ -78,9 +78,32 @@ export default function ArticlesLibraryPage() {
     window.location.href = "/admin/content-engine/social";
   };
 
+  const formatReleaseDate = (dateStr?: string) => {
+    if (!dateStr) return "";
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return dateStr;
+      return d.toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
+  const isArticleScheduled = (a: any) =>
+    a.status === "SCHEDULED" || (a.status !== "PUBLISHED" && Boolean(a.scheduled_date));
+
+  const isArticleDraft = (a: any) =>
+    a.status !== "PUBLISHED" && !a.scheduled_date;
+
   const filteredArticles = articles.filter((a) => {
-    if (activeTab === "DRAFTS") return a.status === "DRAFT_READY" && !a.scheduled_date;
-    if (activeTab === "SCHEDULED") return a.status === "SCHEDULED" || (a.status !== "PUBLISHED" && a.scheduled_date);
+    if (activeTab === "DRAFTS") return a.status !== "PUBLISHED";
+    if (activeTab === "SCHEDULED") return isArticleScheduled(a);
     if (activeTab === "PUBLISHED") return a.status === "PUBLISHED";
     return true;
   });
@@ -127,7 +150,7 @@ export default function ArticlesLibraryPage() {
                 activeTab === "DRAFTS" ? "bg-[#0B1025] text-white" : "text-[#626985] hover:bg-[#F5F4FF]"
               }`}
             >
-              Drafts ({articles.filter((a) => a.status === "DRAFT_READY" && !a.scheduled_date).length})
+              Drafts ({articles.filter((a) => a.status !== "PUBLISHED").length})
             </button>
             <button
               onClick={() => setActiveTab("SCHEDULED")}
@@ -135,7 +158,7 @@ export default function ArticlesLibraryPage() {
                 activeTab === "SCHEDULED" ? "bg-blue-600 text-white" : "text-[#626985] hover:bg-[#F5F4FF]"
               }`}
             >
-              Scheduled ({articles.filter((a) => a.status === "SCHEDULED" || (a.status !== "PUBLISHED" && a.scheduled_date)).length})
+              Scheduled ({articles.filter(isArticleScheduled).length})
             </button>
             <button
               onClick={() => setActiveTab("PUBLISHED")}
@@ -186,9 +209,9 @@ export default function ArticlesLibraryPage() {
                       <span>• Slug: /blog/{art.slug}</span>
                       <span>• Category: {art.category || "Technical SEO"}</span>
                       {art.scheduled_date && (
-                        <span className="text-blue-600 font-semibold flex items-center gap-1">
+                        <span className="text-blue-700 font-bold bg-blue-50 px-2 py-0.5 rounded flex items-center gap-1 border border-blue-200">
                           <Calendar className="w-3 h-3" />
-                          <span>Release: {art.scheduled_date}</span>
+                          <span>Release: {formatReleaseDate(art.scheduled_date)}</span>
                         </span>
                       )}
                     </div>
@@ -208,7 +231,7 @@ export default function ArticlesLibraryPage() {
                           : "bg-purple-100 text-purple-800 border border-purple-200"
                       }`}
                     >
-                      {art.status}
+                      {isPub ? "PUBLISHED" : isSched ? "SCHEDULED" : "DRAFT"}
                     </span>
 
                     {/* View Live Blog */}

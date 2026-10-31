@@ -3,6 +3,8 @@ import fs from "fs";
 
 interface TableData {
   enquiries: any[];
+  lead_activities: any[];
+  lead_followups: any[];
   feature_flags: any[];
   keyword_opportunities: any[];
   editorial_calendar: any[];
@@ -39,6 +41,8 @@ class JsonDatabase {
         const parsed = JSON.parse(raw);
         return {
           enquiries: parsed.enquiries || [],
+          lead_activities: parsed.lead_activities || [],
+          lead_followups: parsed.lead_followups || [],
           feature_flags: parsed.feature_flags || [],
           keyword_opportunities: parsed.keyword_opportunities || [],
           editorial_calendar: parsed.editorial_calendar || [],
@@ -57,6 +61,8 @@ class JsonDatabase {
     }
     return {
       enquiries: [],
+      lead_activities: [],
+      lead_followups: [],
       feature_flags: [],
       keyword_opportunities: [],
       editorial_calendar: [],
@@ -270,6 +276,100 @@ Yes. Our web engineering team builds custom Next.js architectures that achieve 9
       modified = true;
     }
 
+    if (!this.data.enquiries || this.data.enquiries.length === 0) {
+      this.data.enquiries = [
+        {
+          id: "enq-101",
+          name: "Rohit Verma",
+          email: "rohit@edutechgrowth.in",
+          phone: "+91 98112 45890",
+          company: "EduTech Growth Labs",
+          service: "Technical SEO & Core Web Vitals",
+          message: "Our JEE test prep portal experiences high INP latency during peak mock tests. We need an end-to-end technical SEO and Core Web Vitals audit.",
+          source_page: "/services/technical-seo",
+          referrer: "https://google.com",
+          utm_source: "google",
+          utm_medium: "cpc",
+          utm_campaign: "technical-seo-q4",
+          status: "WORKING",
+          stage: "WORKING",
+          qualification_score: "HOT",
+          timeline: "Urgent (< 1 week)",
+          qualification_notes: "Strong budget. Looking to launch revamped portal before December enrollment cycle.",
+          last_contacted_at: "2026-10-31T06:30:00.000Z",
+          created_at: "2026-10-30T14:20:00.000Z",
+          notes: "Initial consultation call held. Agreed on Next.js hydration optimization roadmap.",
+        },
+        {
+          id: "enq-102",
+          name: "Meera Sen",
+          email: "meera.sen@finpeak.co",
+          phone: "+91 98730 11234",
+          company: "FinPeak Wealth Advisory",
+          service: "Performance Marketing & PPC",
+          message: "Looking for high-intent Google Ads management for ultra-HNW wealth management in Delhi NCR.",
+          source_page: "/services/performance-marketing",
+          referrer: "https://linkedin.com",
+          utm_source: "linkedin",
+          utm_medium: "organic",
+          utm_campaign: "hnw-growth",
+          status: "NEW",
+          stage: "NEW",
+          qualification_score: "WARM",
+          timeline: "1-2 Weeks",
+          qualification_notes: "Inbound via LinkedIn case study on ROAS.",
+          last_contacted_at: null,
+          created_at: "2026-10-31T05:15:00.000Z",
+          notes: "",
+        },
+      ];
+      modified = true;
+    }
+
+    if (!this.data.lead_activities || this.data.lead_activities.length === 0) {
+      this.data.lead_activities = [
+        {
+          id: "act-1",
+          inquiry_id: "enq-101",
+          author: "Sudhir (Agency Director)",
+          action: "call_logged",
+          note: "Phone consultation with Rohit Verma. Reviewed Google Search Console INP issues. Verified that client has engineering team ready to execute SSR fixes.",
+          old_stage: "NEW",
+          new_stage: "WORKING",
+          created_at: "2026-10-30T16:00:00.000Z",
+        },
+        {
+          id: "act-2",
+          inquiry_id: "enq-101",
+          author: "HelloShiva Lead Strategist",
+          action: "whatsapp_sent",
+          note: "Shared HelloShiva 2026 Core Web Vitals Benchmark case study via WhatsApp.",
+          old_stage: "WORKING",
+          new_stage: "WORKING",
+          created_at: "2026-10-30T17:30:00.000Z",
+        },
+      ];
+      modified = true;
+    }
+
+    if (!this.data.lead_followups || this.data.lead_followups.length === 0) {
+      this.data.lead_followups = [
+        {
+          id: "fol-1",
+          inquiry_id: "enq-101",
+          type: "meeting",
+          title: "Technical SEO Scope & Retainer Presentation",
+          notes: "Present sub-second LCP roadmap and monthly advisory fee to EduTech board.",
+          due_at: "2026-11-02T11:00:00.000Z",
+          priority: "high",
+          status: "pending",
+          completed_at: null,
+          created_at: "2026-10-30T17:35:00.000Z",
+        },
+      ];
+      modified = true;
+    }
+
     if (modified) {
       this.save();
     }
@@ -301,6 +401,26 @@ Yes. Our web engineering team builds custom Next.js architectures that achieve 9
       return [...(this.data.enquiries || [])].sort((a, b) =>
         (b.created_at || "").localeCompare(a.created_at || "")
       );
+    }
+
+    // lead_activities
+    if (s.includes("from lead_activities")) {
+      let list = [...(this.data.lead_activities || [])];
+      if (s.includes("where inquiry_id = ?")) {
+        const [inqId] = params;
+        list = list.filter((a) => a.inquiry_id === inqId);
+      }
+      return list.sort((a, b) => (b.created_at || "").localeCompare(a.created_at || ""));
+    }
+
+    // lead_followups
+    if (s.includes("from lead_followups")) {
+      let list = [...(this.data.lead_followups || [])];
+      if (s.includes("where inquiry_id = ?")) {
+        const [inqId] = params;
+        list = list.filter((f) => f.inquiry_id === inqId);
+      }
+      return list.sort((a, b) => (a.due_at || "").localeCompare(b.due_at || ""));
     }
 
     // 2. SELECT * FROM articles
@@ -450,9 +570,61 @@ Yes. Our web engineering team builds custom Next.js architectures that achieve 9
         name, email, phone, company, service, message,
         source_page, referrer, utm_source, utm_medium, utm_campaign,
         status: "NEW",
+        stage: "NEW",
+        qualification_score: "WARM",
+        timeline: "1-2 Weeks",
+        qualification_notes: "",
+        last_contacted_at: null,
         notes: "",
       });
       changes = 1;
+    }
+
+    // INSERT INTO lead_activities
+    else if (s.includes("insert into lead_activities")) {
+      const [id, inquiry_id, author, action, note, old_stage, new_stage] = params;
+      this.data.lead_activities.push({
+        id: id || `act-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        inquiry_id,
+        author: author || "Agency Admin",
+        action: action || "note_added",
+        note,
+        old_stage: old_stage || null,
+        new_stage: new_stage || null,
+        created_at: new Date().toISOString(),
+      });
+      changes = 1;
+    }
+
+    // INSERT INTO lead_followups
+    else if (s.includes("insert into lead_followups")) {
+      const [id, inquiry_id, type, title, notes, due_at, priority] = params;
+      this.data.lead_followups.push({
+        id: id || `fol-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+        inquiry_id,
+        type: type || "phone_call",
+        title: title || "Scheduled Follow-up",
+        notes: notes || "",
+        due_at: due_at || new Date(Date.now() + 86400000).toISOString(),
+        priority: priority || "medium",
+        status: "pending",
+        completed_at: null,
+        created_at: new Date().toISOString(),
+      });
+      changes = 1;
+    }
+
+    // UPDATE lead_followups
+    else if (s.includes("update lead_followups")) {
+      if (s.includes("set status = ?, completed_at = ? where id = ?")) {
+        const [status, completed_at, id] = params;
+        const fol = this.data.lead_followups.find((f) => f.id === id);
+        if (fol) {
+          fol.status = status;
+          fol.completed_at = completed_at;
+          changes = 1;
+        }
+      }
     }
 
     // 2. UPDATE enquiries
@@ -462,6 +634,19 @@ Yes. Our web engineering team builds custom Next.js architectures that achieve 9
         const item = this.data.enquiries.find((e) => e.id === id);
         if (item) {
           item.status = status;
+          item.stage = status;
+          changes = 1;
+        }
+      } else if (s.includes("set stage = ?")) {
+        const [stage, qualification_score, timeline, qualification_notes, last_contacted_at, id] = params;
+        const item = this.data.enquiries.find((e) => e.id === id);
+        if (item) {
+          item.stage = stage;
+          item.status = stage;
+          if (qualification_score !== undefined) item.qualification_score = qualification_score;
+          if (timeline !== undefined) item.timeline = timeline;
+          if (qualification_notes !== undefined) item.qualification_notes = qualification_notes;
+          item.last_contacted_at = last_contacted_at || new Date().toISOString();
           changes = 1;
         }
       } else if (s.includes("set notes = ? where id = ?")) {

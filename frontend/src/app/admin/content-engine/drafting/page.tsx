@@ -23,6 +23,14 @@ function AiDraftingDeskInner() {
 
   const [activeTab, setActiveTab] = useState<"create" | "improve">("create");
 
+  // AI Configuration State
+  const [selectedModel, setSelectedModel] = useState("gemini-2.0-flash");
+  const [apiKeyConfigured, setApiKeyConfigured] = useState(false);
+  const [showKeyInput, setShowKeyInput] = useState(false);
+  const [inputKey, setInputKey] = useState("");
+  const [savingKey, setSavingKey] = useState(false);
+  const [showPromptPreview, setShowPromptPreview] = useState(false);
+
   // Create Form State
   const [headline, setHeadline] = useState("");
   const [primaryKeyword, setPrimaryKeyword] = useState("");
@@ -42,6 +50,49 @@ function AiDraftingDeskInner() {
   const [draftResult, setDraftResult] = useState<any>(null);
   const [draftArticleId, setDraftArticleId] = useState<string>("");
   const [error, setError] = useState("");
+
+  // Check integration settings on mount
+  useEffect(() => {
+    fetch("/api/v1/content-engine/settings")
+      .then((res) => res.json())
+      .then((d) => {
+        if (d.success) {
+          const keyRow = d.settings?.find((s: any) => s.key === "GEMINI_API_KEY");
+          const modelRow = d.settings?.find((s: any) => s.key === "GEMINI_MODEL");
+          if (keyRow?.value && keyRow.value.trim().length > 0) {
+            setApiKeyConfigured(true);
+            setInputKey(keyRow.value);
+          }
+          if (modelRow?.value) {
+            setSelectedModel(modelRow.value);
+          }
+        }
+      })
+      .catch((e) => console.error(e));
+  }, []);
+
+  const handleSaveApiKey = async () => {
+    if (!inputKey.trim()) return;
+    setSavingKey(true);
+    try {
+      await fetch("/api/v1/content-engine/settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          settings: {
+            GEMINI_API_KEY: inputKey.trim(),
+            GEMINI_MODEL: selectedModel,
+          },
+        }),
+      });
+      setApiKeyConfigured(true);
+      setShowKeyInput(false);
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSavingKey(false);
+    }
+  };
 
   // Prefill from URL query params (e.g. from SEO Research Desk!)
   useEffect(() => {
@@ -109,6 +160,7 @@ function AiDraftingDeskInner() {
           targetAudience: targetAudience.trim() || "Digital Marketers, Founders, and CTOs",
           suggestedCta: suggestedCta.trim(),
           calendarId,
+          modelOverride: selectedModel,
         }),
       });
 
@@ -169,7 +221,125 @@ function AiDraftingDeskInner() {
 
       {/* Tab A: Create Draft */}
       {activeTab === "create" && (
-        <div className="space-y-8">
+        <div className="space-y-6">
+          {/* AI Intelligence & Transparency Bar */}
+          <div className="bg-[#171F42] text-white rounded-3xl p-6 sm:p-7 border border-[#252B49] shadow-md space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#252B49] pb-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                  <span className="text-xs font-bold uppercase tracking-wider text-[#8067FF]">
+                    AI Drafting Engine & Model Configuration
+                  </span>
+                </div>
+                <h3 className="text-sm font-bold text-white">
+                  Google Gemini Strategic Intelligence Layer
+                </h3>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                {apiKeyConfigured ? (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <Check className="w-3.5 h-3.5" />
+                    <span>Live Gemini API Key Active</span>
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-amber-500/10 text-amber-300 border border-amber-500/20">
+                    <span>⚠️ Offline Mode (Agency Strategy Fallback)</span>
+                  </span>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => setShowKeyInput(!showKeyInput)}
+                  className="px-3 py-1 rounded-xl text-xs font-semibold text-white bg-[#0B1025] hover:bg-[#252B49] border border-[#252B49] transition-colors"
+                >
+                  {showKeyInput ? "Close Key Settings" : "Configure API Key"}
+                </button>
+              </div>
+            </div>
+
+            {/* Inline API Key Setting Input */}
+            {showKeyInput && (
+              <div className="p-4 rounded-2xl bg-[#0B1025] border border-[#252B49] space-y-3">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#C6C9DC]">Enter Google Gemini API Key:</span>
+                  <span className="text-[11px] text-[#626985]">Get key from Google AI Studio</span>
+                </div>
+                <div className="flex gap-2">
+                  <input
+                    type="password"
+                    value={inputKey}
+                    onChange={(e) => setInputKey(e.target.value)}
+                    placeholder="AIzaSy..."
+                    className="flex-1 px-3.5 py-2 rounded-xl bg-[#171F42] border border-[#252B49] text-xs text-white focus:outline-none focus:border-[#6366F1] font-mono"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleSaveApiKey}
+                    disabled={savingKey || !inputKey.trim()}
+                    className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#6366F1] to-[#8067FF] disabled:opacity-50"
+                  >
+                    {savingKey ? "Saving..." : "Save Key"}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Model Selector & Prompt Inspector */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+              <div>
+                <label className="block text-xs font-semibold text-[#C6C9DC] mb-1.5">
+                  Select AI Generation Model:
+                </label>
+                <select
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value)}
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-[#0B1025] border border-[#252B49] text-xs text-white focus:outline-none focus:border-[#6366F1]"
+                >
+                  <option value="gemini-2.0-flash">Google Gemini 2.0 Flash (Recommended — Flagship Speed & Reasoning)</option>
+                  <option value="gemini-1.5-pro">Google Gemini 1.5 Pro (Deep Topical Reasoning & Architectural Depth)</option>
+                  <option value="gemini-1.5-flash">Google Gemini 1.5 Flash (Lightweight & Rapid)</option>
+                </select>
+              </div>
+
+              <div className="flex flex-col justify-end">
+                <button
+                  type="button"
+                  onClick={() => setShowPromptPreview(!showPromptPreview)}
+                  className="w-full py-2.5 px-4 rounded-xl text-xs font-semibold text-[#C6C9DC] hover:text-white bg-[#0B1025] hover:bg-[#252B49] border border-[#252B49] flex items-center justify-between transition-colors"
+                >
+                  <span>🔍 View Prompt & Instructions sent to LLM</span>
+                  <span>{showPromptPreview ? "▲ Hide" : "▼ Inspect"}</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Expandable Prompt Inspection Drawer */}
+            {showPromptPreview && (
+              <div className="p-4 rounded-2xl bg-[#0B1025] border border-[#252B49] space-y-2 text-xs">
+                <div className="font-bold text-[#8067FF] text-[11px] uppercase tracking-wider">
+                  System Prompt & Quality Directives
+                </div>
+                <div className="text-[#C6C9DC] font-mono text-[11px] leading-relaxed bg-[#171F42] p-3 rounded-xl border border-[#252B49] whitespace-pre-wrap">
+{`You are a Principal Technical SEO Director at HelloShiva (helloshiva.com).
+Generate an authoritative, human-written, commercial guide based on:
+- Target Headline: \${headline}
+- Focus Keyword: \${primaryKeyword}
+- Theme: \${theme}
+- Target Audience: \${targetAudience}
+
+CRITICAL RULES:
+1. Tone: Authoritative, strategic, direct. No robotic filler or generic bullet dumps.
+2. Formatting: No top-level H1 # hashtag. No divider lines (---). Natural bolding only.
+3. Architecture: 3-4 structured ## Section Headings with ### Subsections.
+4. Internal Links: Connect to HelloShiva service pages and free diagnostic tools.
+5. FAQ: Include a dedicated "## Frequently Asked Questions" with 3 distinct Q&A pairs.`}
+                </div>
+              </div>
+            )}
+          </div>
+
           <div className="bg-white rounded-3xl border border-[#E6E7F0] p-6 sm:p-8 shadow-sm">
             <h2 className="text-sm font-bold text-[#10183A] mb-4 flex items-center gap-2">
               <BookOpen className="w-4 h-4 text-[#6366F1]" />

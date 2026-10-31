@@ -109,7 +109,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <aside
         className={`${
           sidebarOpen ? "block" : "hidden"
-        } md:block w-full md:w-64 bg-[#0B1025] text-[#C6C9DC] border-r border-[#252B49] shrink-0 min-h-screen p-5 flex flex-col justify-between`}
+        } md:block w-full md:w-64 bg-[#0B1025] text-[#C6C9DC] border-r border-[#252B49] shrink-0 md:sticky md:top-0 md:h-screen overflow-y-auto p-5 flex flex-col justify-between z-40`}
       >
         <div className="space-y-6">
           {/* Logo */}
@@ -192,7 +192,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       </aside>
 
       {/* Main Admin Workspace */}
-      <main className="flex-1 p-5 sm:p-8 lg:p-10 max-w-7xl overflow-y-auto">
+      <main className="flex-1 min-w-0 overflow-x-hidden p-5 sm:p-8 lg:p-10 max-w-7xl">
         {children}
       </main>
     </div>

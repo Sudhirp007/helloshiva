@@ -35,6 +35,7 @@ export async function POST(req: NextRequest) {
       theme: theme || "Technical SEO Strategy",
       targetAudience: targetAudience || "Digital Marketers and Founders",
       suggestedCta,
+      modelOverride: body.modelOverride,
     });
 
     const articleId = `art-${Date.now()}`;

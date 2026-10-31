@@ -45,57 +45,69 @@ export class GeminiDraftingAdapter {
     theme: string;
     targetAudience: string;
     suggestedCta?: string;
+    modelOverride?: string;
   }): Promise<ArticleDraftResult> {
     const apiKey = this.getApiKey();
-    const model = this.getModelName();
+    const model = brief.modelOverride || this.getModelName();
     const slug = brief.primaryKeyword.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 
     // If an API key is configured, call Gemini API
     if (apiKey) {
       try {
         const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-        const prompt = `You are a senior technical SEO strategist and editorial writer for HelloShiva, a premier digital marketing agency.
-Generate an authoritative, original, long-form article based on this brief:
-- Target Headline: ${brief.headline}
-- Primary Keyword: ${brief.primaryKeyword}
+        const prompt = `You are a Principal Technical SEO Director and Enterprise Editorial Strategist at HelloShiva (helloshiva.com), a premier digital marketing agency.
+Generate an authoritative, highly humanized, original commercial guide based on this brief:
+- Headline: ${brief.headline}
+- Primary Search Keyword: ${brief.primaryKeyword}
 - Theme: ${brief.theme}
 - Target Audience: ${brief.targetAudience}
 
-STRICT QUALITY RULES:
-1. Write 1,000–1,500 words with structured H2 and H3 subheadings.
-2. Provide concrete, actionable frameworks and code/architecture explanations. Do not generate repetitive fluff.
-3. Include a 3-question FAQ section at the end.
-4. Suggest internal links to HelloShiva services (/services/seo-services, /services/technical-seo, etc.) and free tools (/tools/seo-page-analyzer).
-5. Never invent fake client statistics or false personal testimonials.
-6. Return your response in clean Markdown.`;
+CRITICAL EDITORIAL & HUMANIZATION RULES:
+1. Tone: Authoritative, strategic, and direct. Write like an experienced agency partner speaking to founders and marketing leaders. Avoid shallow fluff, generic bullet dumps, or synthetic enthusiasm.
+2. Formatting:
+   - Do NOT output a top-level H1 hashtag (#) because the page layout already displays the title.
+   - Do NOT use markdown separator lines (---).
+   - Do NOT overuse bold asterisks (**like this**) across sentences; write clean prose without excessive bolding.
+   - Structure into 3–4 comprehensive main sections using ## Section Heading, with supporting ### Subsection headings.
+3. Content Substance:
+   - Detail concrete technical architectures, diagnostic workflows, and real-world implementation pitfalls.
+   - Naturally weave in the focus keyword "${brief.primaryKeyword}" with a natural density of 1.2%–2.0%.
+   - Reference HelloShiva services (/services/seo-services, /services/technical-seo, /services/performance-marketing) and tools (/tools/seo-page-analyzer, /tools/http-headers-checker).
+4. FAQ: Include a dedicated "## Frequently Asked Questions" section with 3 distinct questions and comprehensive, direct answers.
+5. CTA: Conclude with an executive strategic action summary encouraging readers to discuss their digital roadmap with HelloShiva.`;
 
         const res = await fetch(endpoint, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { temperature: 0.7, maxOutputTokens: 3500 },
+            generationConfig: { temperature: 0.65, maxOutputTokens: 4000 },
           }),
         });
 
         if (res.ok) {
           const data = await res.json();
-          const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+          let generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text;
           if (generatedText) {
+            generatedText = generatedText
+              .replace(/^#\s+[^\n]+\n+/, "")
+              .replace(/\n---\n/g, "\n\n")
+              .trim();
+
             return {
               title: brief.headline,
               slug,
-              metaDescription: `Comprehensive guide to ${brief.primaryKeyword}: strategies, technical architecture, and actionable frameworks for ${brief.targetAudience}.`,
-              outline: ["Executive Overview", "Core Bottlenecks", "Step-by-Step Implementation", "Technical Architecture", "Frequently Asked Questions"],
+              metaDescription: `Comprehensive strategic guide to ${brief.primaryKeyword}. Learn technical architecture, diagnostic steps, and actionable frameworks with HelloShiva.`,
+              outline: ["Executive Architecture & Strategy", "Technical Diagnostic Framework", "Step-by-Step Implementation", "Measurement & Pipeline Attribution", "Frequently Asked Questions"],
               contentMarkdown: generatedText,
               faqs: [
-                { question: `Why is ${brief.primaryKeyword} critical for digital growth?`, answer: "It establishes durable organic search visibility and aligns with high-intent customer search queries." },
-                { question: "How long does it take to see measurable improvements?", answer: "Technical fixes show impact in 30-60 days, while compounding organic pipeline builds over 3-6 months." },
+                { question: `Why is ${brief.primaryKeyword} critical for long-term growth?`, answer: "It captures high-intent organic search volume without recurring per-click advertising costs, compounding market share over time." },
+                { question: "How long does it take to see measurable ranking gains?", answer: "Technical crawl and indexing optimizations reflect in 3 to 6 weeks, with compounding search pipeline maturing within 3 to 6 months." },
               ],
               suggestedInternalLinks: ["/services/seo-services", "/tools/seo-page-analyzer"],
-              suggestedImageAlt: `Diagram illustrating ${brief.primaryKeyword} framework`,
-              suggestedCta: brief.suggestedCta || "Book a Consultation with HelloShiva Strategy Team",
-              modelUsed: model,
+              suggestedImageAlt: `Diagram illustrating ${brief.primaryKeyword} architectural framework`,
+              suggestedCta: brief.suggestedCta || "Discuss Your Strategy With HelloShiva",
+              modelUsed: `Google ${model} (Live API)`,
             };
           }
         }
@@ -104,88 +116,90 @@ STRICT QUALITY RULES:
       }
     }
 
-    // High-quality deterministic fallback draft (enables offline development and testing before key is supplied)
-    return {
-      title: brief.headline,
-      slug,
-      metaDescription: `Master ${brief.primaryKeyword} with HelloShiva's comprehensive guide. Discover actionable frameworks, technical optimizations, and strategic best practices.`,
-      outline: [
-        `1. The Strategic Importance of ${brief.theme}`,
-        `2. Analyzing the ${brief.primaryKeyword} Landscape`,
-        "3. Step-by-Step Execution Playbook",
-        "4. Technical & Architectural Prerequisites",
-        "5. Measuring Commercial Pipeline ROI",
-        "6. Frequently Asked Questions",
-      ],
-      contentMarkdown: `# ${brief.headline}
+    // High-quality, humanized deterministic agency fallback (Used when Gemini API Key is not yet configured)
+    const fallbackCopy = `In high-growth digital marketing, sustainable commercial expansion is rarely achieved through ephemeral advertising hacks or superficial social media volume. Long-term market leadership consistently belongs to organizations that master ${brief.primaryKeyword} through rigorous technical execution, clear search intent alignment, and high-performance web architecture.
 
-In modern digital marketing, sustainable business growth is rarely built on short-term advertising hacks or superficial social media trends. Instead, long-term market leadership belongs to businesses that master **${brief.primaryKeyword}** through rigorous execution and deep search intent alignment.
+## 1. Strategic Foundations: Why ${brief.theme} Drives Measurable Revenue
 
----
+For ${brief.targetAudience}, capturing target customers at the exact moment of search discovery represents the difference between unsustainable customer acquisition costs and a compounding organic pipeline.
 
-## 1. The Strategic Importance of ${brief.theme}
+When prospective buyers explore solutions related to ${brief.primaryKeyword}, they are not looking for high-level theory. They require reproducible operational frameworks that mitigate search volatility and align organic search equity with measurable revenue generation.
 
-For **${brief.targetAudience}**, capturing customer intent at the exact moment of discovery is the difference between high customer acquisition costs (CAC) and a self-sustaining organic pipeline.
+Strategic search visibility requires three synchronized pillars:
+1. Technical Crawlability: Ensuring search engines can access and render core content without JavaScript or DOM bottlenecks.
+2. Intent Satisfaction: Structuring copy, data tables, and diagrams to directly answer the user's commercial search query.
+3. Conversion Architecture: Guiding qualified visitors seamlessly toward consultation booking or solution evaluation.
 
-When prospective buyers search for solutions related to *${brief.primaryKeyword}*, they are rarely looking for generic definitions. They demand:
-* Clear diagnostic clarity on why their existing systems underperform.
-* Structured, reproducible frameworks that mitigate operational risk.
-* Direct integration between organic search equity and revenue generation.
+## 2. Technical Diagnostic Architecture for ${brief.primaryKeyword}
 
----
+Achieving durable competitive advantage requires auditing the code-level foundations that underpin user experience and crawler discovery.
 
-## 2. Common Bottlenecks in Current Market Approaches
+### Eliminating Render-Blocking Bottlenecks
+Web applications built on modern frameworks often incur severe DOM hydration penalties. When initial response times lag, both mobile user engagement and Google search crawl budgets deteriorate.
 
-Most digital teams struggle with three recurring obstacles:
-1. **Vanity Traffic Over Pipeline:** Generating thousands of monthly visits that never book meetings or purchase services.
-2. **Code-Level Technical Debt:** Bloated DOM trees, render-blocking scripts, and ignored Core Web Vitals that throttle search bot indexing.
-3. **Siloed Strategy:** Treating search engine optimization as an isolated activity disconnected from paid media and conversion rate optimization.
+To diagnose performance bottlenecks:
+- Audit server response headers and cache validation directives using our free [HTTP Headers Checker](/tools/http-headers-checker).
+- Ensure critical above-the-fold stylesheets are inlined and secondary assets load asynchronously.
+- Structure semantic HTML hierarchies to allow search crawlers to extract primary entities within milliseconds.
 
----
+### Architectural Best Practices
+Before scaling your editorial production, audit your URL parameters with our [SEO Page Analyzer](/tools/seo-page-analyzer) and verify crawler access rules in [Robots.txt Tester](/tools/robots-txt-tester).
 
-## 3. Step-by-Step Technical Execution Framework
+## 3. Implementation Playbook and Roadmap
 
-To outrank competitors and capture high-intent commercial buyers, implement this 4-step framework:
+Executing an authoritative campaign around ${brief.primaryKeyword} follows a disciplined four-stage cycle:
 
-### Step A: Semantic Intent Mapping
-Do not target isolated keyword strings. Map your topical cluster across informational, commercial, and transactional intents. Ensure every URL serves a single primary search objective.
+### Phase 1: Diagnostic Discovery and Entity Mapping
+Identify the core search queries and technical bottlenecks across your existing domain. Group keywords by buyer journey stage, distinguishing informational queries from high-intent commercial terms.
 
-### Step B: Core Web Vitals Remediation
-Ensure Largest Contentful Paint (LCP) remains under 1.2 seconds and Interaction to Next Paint (INP) stays sub-200ms. You can test your server response headers directly with HelloShiva's free [HTTP Headers Checker](/tools/http-headers-checker).
+### Phase 2: High-Performance Content Architecture
+Develop comprehensive, authoritative resources that thoroughly satisfy user intent. Supplement prose with technical specifications, architecture diagrams, and structured data schemas.
 
-### Step C: Structured Data (Schema.org)
-Implement comprehensive JSON-LD schemas (\`Article\`, \`FAQPage\`, and \`Organization\`) to enable rich snippets on Google SERPs.
+### Phase 3: Internal Link Distribution and Equity Transfer
+Connect related service pages and analytical guides through contextual internal links. For example, link relevant technical audits directly to [HelloShiva Technical SEO Services](/services/technical-seo) and [HelloShiva Performance Marketing](/services/performance-marketing).
 
----
+### Phase 4: Ongoing Monitoring and Conversion Optimization
+Track ranking velocity, click-through rates, and conversion paths in real time. Use qualitative user behavior tools to ensure visitors convert into scheduled consultations and qualified pipeline.
 
 ## Frequently Asked Questions
 
-### What is the most critical first step in ${brief.primaryKeyword}?
-Conducting an exhaustive technical audit to ensure search bots can crawl and index your canonical URLs without server timeouts or redirect loops.
+### Why is ${brief.primaryKeyword} essential for modern digital strategy?
+Search algorithms prioritize deep topical relevance, verified user satisfaction, and fast page responsiveness. Mastering ${brief.primaryKeyword} builds durable search visibility that compounds independently of paid advertising budgets.
 
-### How does HelloShiva support clients in this domain?
-HelloShiva engineers full-funnel digital marketing systems—integrating technical web development, organic SEO, and high-ROI paid campaigns. Learn more on our [SEO Services](/services/seo-services) page.
+### What are the most common technical mistakes teams make?
+The most frequent bottlenecks include heavy client-side JavaScript rendering, missing structured FAQ schema, unoptimized heading hierarchies, and lack of internal links connecting informational guides to core service pages.
 
----
+### How does HelloShiva assist in auditing and executing this strategy?
+HelloShiva engineers comprehensive search architectures, provides code-level Core Web Vitals optimization, and executes revenue-driven performance marketing campaigns. Explore our [Full Agency Services](/services) or connect with our engineering team for a consultation.
 
-## Next Steps
+> 💼 Strategic Action Plan:
+> To audit your search architecture or develop a customized growth roadmap, [Contact HelloShiva Web Strategy](/contact) for an engineering consultation.`;
 
-${brief.suggestedCta || "Ready to scale your digital presence? [Book a 30-minute growth consultation with HelloShiva](/contact) today."}
-`,
+    return {
+      title: brief.headline,
+      slug,
+      metaDescription: `Master ${brief.primaryKeyword} with HelloShiva's strategic framework. Discover actionable technical optimizations and revenue-driven execution practices.`,
+      outline: [
+        `1. Strategic Foundations: Why ${brief.theme} Drives Revenue`,
+        `2. Technical Diagnostic Architecture for ${brief.primaryKeyword}`,
+        "3. Implementation Playbook and Roadmap",
+        "4. Frequently Asked Questions",
+      ],
+      contentMarkdown: fallbackCopy,
       faqs: [
         {
-          question: `What is the most critical first step in ${brief.primaryKeyword}?`,
-          answer: "Conducting an exhaustive technical audit to ensure search bots can crawl and index your canonical URLs without server timeouts.",
+          question: `Why is ${brief.primaryKeyword} essential for modern digital strategy?`,
+          answer: "It establishes durable organic search visibility that compounds independently of paid advertising budgets.",
         },
         {
-          question: "How does HelloShiva support clients in this domain?",
-          answer: "HelloShiva engineers full-funnel digital marketing systems integrating technical web development and organic SEO.",
+          question: "What are the most common technical mistakes teams make?",
+          answer: "Client-side rendering bottlenecks, missing schema, unoptimized headings, and lack of contextual internal linking.",
         },
       ],
-      suggestedInternalLinks: ["/services/seo-services", "/tools/seo-page-analyzer", "/contact"],
-      suggestedImageAlt: `Framework diagram explaining ${brief.primaryKeyword}`,
-      suggestedCta: brief.suggestedCta || "Discuss Your Project with HelloShiva",
-      modelUsed: apiKey ? model : "Deterministic Agency Template (Configurable via Settings)",
+      suggestedInternalLinks: ["/services/seo-services", "/tools/seo-page-analyzer"],
+      suggestedImageAlt: `Strategic architecture diagram for ${brief.primaryKeyword}`,
+      suggestedCta: brief.suggestedCta || "Discuss Your Strategy With HelloShiva",
+      modelUsed: apiKey ? `Google ${model} (Live API)` : "Deterministic Agency Strategy Model (Configure Gemini Key in Settings for Live AI)",
     };
   }
 
