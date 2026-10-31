@@ -542,3 +542,39 @@ Begin by interviewing your existing customers to identify the top 5 questions th
     return NextResponse.json({ success: false, error: err.message }, { status: 500 });
   }
 }
+
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const title = searchParams.get("title");
+
+  if (!title) {
+    return NextResponse.json({
+      status: "active",
+      endpoint: "/api/v1/content-intelligence/draft",
+      method: "POST",
+      description: "HelloShiva AI Content Intelligence Drafting Engine. Submit a POST request with JSON body { title, primaryKeyword, searchIntent, targetServiceSlug, relatedFreeToolSlug } to generate publication-ready drafts.",
+      supportedModels: [
+        "gemini-flash-lite-latest",
+        "gemini-3.5-flash-lite",
+        "gemini-3.7-flash",
+        "gemini-3.5-flash"
+      ],
+      editorUrl: "/admin/content-intelligence/editor",
+    });
+  }
+
+  // Forward GET with query parameters to POST for convenient browser testing!
+  return POST(
+    new Request(req.url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title,
+        primaryKeyword: searchParams.get("keyword") || searchParams.get("primaryKeyword") || "",
+        searchIntent: searchParams.get("intent") || "Informational",
+        targetServiceSlug: searchParams.get("service") || "",
+        relatedFreeToolSlug: searchParams.get("tool") || "",
+      }),
+    })
+  );
+}
