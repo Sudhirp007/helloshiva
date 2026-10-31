@@ -38,6 +38,10 @@ venv/
 ENV/
 *.sqlite3
 *.db
+*.db-wal
+*.db-shm
+frontend/data/*.db*
+data/*.db*
 
 # Temporary & Editor
 .vscode/

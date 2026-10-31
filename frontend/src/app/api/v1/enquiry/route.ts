@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import db from "@/lib/db";
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,7 +21,7 @@ export async function POST(req: NextRequest) {
 
     // 1. Anti-spam honeypot detection
     if (honeypot) {
-      return NextResponse.json({ success: true, message: "Inquiry received" });
+      return NextResponse.json({ success: true, message: "Inquiry received." });
     }
 
     // 2. Input validation
@@ -46,29 +47,29 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Attempt forward to FastAPI backend if running
-    const backendUrl = process.env.BACKEND_API_URL || "http://127.0.0.1:8000";
-    try {
-      const backendRes = await fetch(`${backendUrl}/api/v1/enquiry`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-        signal: AbortSignal.timeout(2000), // Quick timeout
-      });
-      if (backendRes.ok) {
-        return NextResponse.json(await backendRes.json());
-      }
-    } catch {
-      // Backend not yet reachable (fallback to local mock persistence)
-      console.log("[Enquiry Received via Frontend Fallback]:", {
-        name,
-        email,
-        phone,
-        service,
-        source_page,
-        timestamp: new Date().toISOString(),
-      });
-    }
+    // 3. Persist to SQLite Database
+    const id = `enq-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+    const insertStmt = db.prepare(`
+      INSERT INTO enquiries (
+        id, name, email, phone, company, service, message,
+        source_page, referrer, utm_source, utm_medium, utm_campaign, status
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'NEW')
+    `);
+
+    insertStmt.run(
+      id,
+      name.trim(),
+      email.trim(),
+      phone ? phone.trim() : null,
+      company ? company.trim() : null,
+      service || "seo-services",
+      message.trim(),
+      source_page || "/",
+      referrer || null,
+      utm_source || null,
+      utm_medium || null,
+      utm_campaign || null
+    );
 
     return NextResponse.json({
       success: true,
@@ -76,7 +77,7 @@ export async function POST(req: NextRequest) {
     });
   } catch (error: any) {
     return NextResponse.json(
-      { success: false, message: "Internal server error processing enquiry." },
+      { success: false, message: error.message || "Internal server error processing enquiry." },
       { status: 500 }
     );
   }
