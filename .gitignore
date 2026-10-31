@@ -38,6 +38,12 @@ venv/
 ENV/
 *.sqlite3
 *.db
+# Build & Deploy Archives
+deploy-pkg/
+helloshiva-release.tar.gz
+node-v*
+*.tar.gz
+*.tar.xz
 *.db-wal
 *.db-shm
 frontend/data/*.db*
