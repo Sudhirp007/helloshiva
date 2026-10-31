@@ -21,6 +21,8 @@ import {
   LogOut,
   FileText,
   User,
+  Layers,
+  TrendingUp,
 } from "lucide-react";
 
 const navSections = [
@@ -28,6 +30,19 @@ const navSections = [
     title: "Agency Operations",
     items: [
       { name: "Inquiries & Leads CRM", href: "/admin/enquiries", icon: <Mail className="w-4 h-4" /> },
+    ],
+  },
+  {
+    title: "Content Intelligence Engine",
+    items: [
+      { name: "1. Strategy & Topic Clusters", href: "/admin/content-intelligence/clusters", icon: <Layers className="w-4 h-4" /> },
+      { name: "2. Research & Discovery Desk", href: "/admin/content-intelligence/research", icon: <Search className="w-4 h-4" /> },
+      { name: "3. Editorial Calendar & Briefs", href: "/admin/content-intelligence/calendar", icon: <Calendar className="w-4 h-4" /> },
+      { name: "4. Content Studio & Editor", href: "/admin/content-intelligence/editor", icon: <FileEdit className="w-4 h-4" /> },
+      { name: "5. Central Article Library", href: "/admin/content-intelligence/articles", icon: <FileText className="w-4 h-4" /> },
+      { name: "6. Social Repurposing Studio", href: "/admin/content-intelligence/social", icon: <Share2 className="w-4 h-4" /> },
+      { name: "7. Performance & Attribution", href: "/admin/content-intelligence/analytics", icon: <TrendingUp className="w-4 h-4" /> },
+      { name: "8. Brand Voice & Settings", href: "/admin/content-intelligence/settings", icon: <Settings className="w-4 h-4" /> },
     ],
   },
 ];

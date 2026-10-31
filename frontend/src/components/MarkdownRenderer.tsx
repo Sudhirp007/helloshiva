@@ -489,10 +489,30 @@ function parseMarkdownToBlocks(text: string): Block[] {
       flushList();
     }
 
-    // 9. If inside FAQ section and pending question exists, this is part of the answer!
-    if (inFaqSection && pendingFaqQuestion) {
-      pendingFaqAnswerLines.push(line);
-      continue;
+    // 9. If inside FAQ section, parse questions & answers flexibly
+    if (inFaqSection) {
+      // Catch questions formatted as **What is ...?** with optional inline answer
+      const boldQMatch = line.match(/^\*{2,3}(?:Q:?\s*)?([^*?]+\?)\*{2,3}(?:\s*(.*))?$/);
+      if (boldQMatch) {
+        flushFaqQuestion();
+        pendingFaqQuestion = boldQMatch[1].trim();
+        if (boldQMatch[2]) {
+          pendingFaqAnswerLines.push(boldQMatch[2].trim());
+        }
+        continue;
+      }
+
+      // Catch standalone question line ending with ? if no question is currently pending
+      if (line.endsWith("?") && line.length < 140 && !pendingFaqQuestion) {
+        flushFaqQuestion();
+        pendingFaqQuestion = line.replace(/^\d+[\.\)]\s*/, "").replace(/^Q:\s*/i, "").trim();
+        continue;
+      }
+
+      if (pendingFaqQuestion) {
+        pendingFaqAnswerLines.push(line);
+        continue;
+      }
     }
 
     // 10. Normal paragraph text
