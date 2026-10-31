@@ -120,6 +120,8 @@ function EditorComponent() {
 
   // SEO Audit State
   const [audit, setAudit] = useState<AuditResult | null>(null);
+  const [editorialValidation, setEditorialValidation] = useState<any>(null);
+  const [contentBrief, setContentBrief] = useState<any>(null);
 
   // Sync Slug & Category when Title changes
   const handleTitleChange = (newTitle: string) => {
@@ -263,6 +265,8 @@ function EditorComponent() {
         if (data.relatedFreeToolSlug) {
           setRelatedTool(data.relatedFreeToolSlug);
         }
+        if (data.brief) setContentBrief(data.brief);
+        if (data.validation) setEditorialValidation(data.validation);
         setHasUnsavedChanges(true);
         setMessage({
           text: `AI Draft successfully generated for "${title}" with HelloShiva branding & ${data.modelUsed}!`,
@@ -827,6 +831,34 @@ function EditorComponent() {
               />
             </div>
           </div>
+
+          {/* Editorial Relevance & Brief Alignment Card */}
+          {editorialValidation && (
+            <div className="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200/80 space-y-3">
+              <div className="flex items-center justify-between text-xs font-bold text-indigo-950">
+                <span className="flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-indigo-600" />
+                  Editorial Relevance Alignment
+                </span>
+                <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold ${editorialValidation.passed ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                  {editorialValidation.passed ? 'PASSED' : 'REVIEW'}
+                </span>
+              </div>
+              <div className="grid grid-cols-2 gap-2 text-[11px] text-indigo-900 font-mono">
+                <div>Title Delivery: <strong>{editorialValidation.titleAlignment}%</strong></div>
+                <div>Topic Breadth: <strong>{editorialValidation.topicCompleteness}%</strong></div>
+                <div>Audience Match: <strong>{editorialValidation.audienceAlignment}%</strong></div>
+                <div>Factual Risk: <strong className={editorialValidation.factualRisk === 'low' ? 'text-emerald-700' : 'text-amber-700'}>{editorialValidation.factualRisk.toUpperCase()}</strong></div>
+              </div>
+              {editorialValidation.warnings && editorialValidation.warnings.length > 0 && (
+                <div className="pt-2 border-t border-indigo-200/60 space-y-1">
+                  {editorialValidation.warnings.map((w: string, i: number) => (
+                    <p key={i} className="text-[10px] text-amber-800 font-medium leading-tight">⚠️ {w}</p>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Quantitative Metrics Checklist */}
           <div className="space-y-3">
