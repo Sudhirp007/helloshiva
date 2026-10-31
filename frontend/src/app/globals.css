@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Brand */
+  --brand-navy: #0B1025;
+  --brand-midnight: #171F42;
+  --brand-indigo: #6366F1;
+  --brand-violet: #8067FF;
+
+  /* Light surfaces */
+  --background: #FFFFFF;
+  --background-soft: #F5F4FF;
+  --surface-lavender: #E8E7FF;
+
+  /* Typography */
+  --text-dark: #10183A;
+  --text-light: #FFFFFF;
+  --text-muted-dark: #626985;
+  --text-muted-light: #C6C9DC;
+
+  /* Borders */
+  --border-dark: #252B49;
+  --border-light: #E6E7F0;
+
+  /* Gradients */
+  --gradient-brand: linear-gradient(110deg, #6366F1, #8067FF, #A78BFA);
+  --gradient-dark: linear-gradient(110deg, #0B1025, #171F42, #29205D);
+}
+
+@layer base {
+  body {
+    background-color: var(--background);
+    color: var(--text-dark);
+    font-feature-settings: "rlig" 1, "calt" 1;
+    overflow-x: hidden;
+  }
+}
+
+/* Custom Utilities for Agency Polish */
+.bg-brand-gradient {
+  background: linear-gradient(110deg, #6366F1 0%, #8067FF 50%, #A78BFA 100%);
+}
+
+.text-gradient {
+  background: linear-gradient(110deg, #6366F1 0%, #8067FF 50%, #A78BFA 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.text-gradient-light {
+  background: linear-gradient(110deg, #FFFFFF 0%, #E8E7FF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.bg-dark-hero {
+  background: linear-gradient(135deg, #0B1025 0%, #171F42 60%, #1E164A 100%);
+}
+
+.bg-light-section {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F5F4FF 100%);
+}
+
+.glass-dark {
+  background: rgba(23, 31, 66, 0.7);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-light {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(12px);
+  border: 1px solid #E6E7F0;
+}
