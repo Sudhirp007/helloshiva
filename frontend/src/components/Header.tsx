@@ -85,7 +85,7 @@ export default function Header() {
           <div className="hidden md:flex items-center gap-3">
             {isAdmin && (
               <Link
-                href="/admin/content-engine/overview"
+                href="/admin/enquiries"
                 className="px-3.5 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#6366F1] to-[#8067FF] hover:opacity-90 shadow-md shadow-indigo-500/25 flex items-center gap-1.5 transition-all"
               >
                 <span>⚡ Admin Command Center</span>
@@ -139,7 +139,7 @@ export default function Header() {
           <div className="pt-4 border-t border-[#252B49] flex flex-col gap-2.5">
             {isAdmin && (
               <Link
-                href="/admin/content-engine/overview"
+                href="/admin/enquiries"
                 className="w-full text-center py-2.5 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-[#6366F1] to-[#8067FF]"
               >
                 ⚡ Return to Admin Command Center

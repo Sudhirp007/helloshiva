@@ -29,7 +29,7 @@ export default function AdminLoginPage() {
         localStorage.setItem("helloshiva_admin_auth", "true");
         localStorage.setItem("helloshiva_admin_user", JSON.stringify(data.user));
         document.cookie = "helloshiva_admin_session=active; path=/; max-age=86400";
-        router.push("/admin/content-engine/overview");
+        router.push("/admin/enquiries");
       } else {
         setError(data.message || "Invalid email or password.");
       }

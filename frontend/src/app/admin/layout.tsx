@@ -30,24 +30,6 @@ const navSections = [
       { name: "Inquiries & Leads CRM", href: "/admin/enquiries", icon: <Mail className="w-4 h-4" /> },
     ],
   },
-  {
-    title: "Flagship Content Studio",
-    items: [
-      { name: "⚡ Content Studio (Pipeline)", href: "/admin/content-studio", icon: <Sparkles className="w-4 h-4 text-[#8067FF]" /> },
-    ],
-  },
-  {
-    title: "Content Marketing Engine",
-    items: [
-      { name: "1. Overview Dashboard", href: "/admin/content-engine/overview", icon: <LayoutDashboard className="w-4 h-4" /> },
-      { name: "2. SEO Research Desk", href: "/admin/content-engine/research", icon: <Search className="w-4 h-4" /> },
-      { name: "3. AI Drafting & Studio", href: "/admin/content-studio", icon: <FileEdit className="w-4 h-4" /> },
-      { name: "4. Social Repurposing", href: "/admin/content-engine/social", icon: <Share2 className="w-4 h-4" /> },
-      { name: "5. Editorial Calendar", href: "/admin/content-engine/calendar", icon: <Calendar className="w-4 h-4" /> },
-      { name: "6. Article Library", href: "/admin/content-engine/articles", icon: <FileText className="w-4 h-4" /> },
-      { name: "7. Settings & Flags", href: "/admin/content-engine/settings", icon: <Settings className="w-4 h-4" /> },
-    ],
-  },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
