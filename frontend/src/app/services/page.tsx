@@ -7,12 +7,74 @@ import EnquiryForm from "@/components/EnquiryForm";
 export const metadata = {
   title: "Digital Marketing Services",
   description:
-    "Explore HelloShiva's full-funnel digital marketing services: SEO, Technical SEO, Local SEO, Performance PPC, Social Media, Content Marketing, and Web Engineering.",
+    "Explore HelloShiva's full-funnel digital marketing services: Technical SEO, Local SEO, Performance PPC, Social Media, Content Marketing, and Web Engineering.",
+  alternates: {
+    canonical: `${siteConfig.url}/services`,
+  },
+  openGraph: {
+    title: "Digital Marketing Services | HelloShiva",
+    description:
+      "Explore HelloShiva's full-funnel digital marketing services: Technical SEO, Local SEO, Performance PPC, Social Media, Content Marketing, and Web Engineering.",
+    url: `${siteConfig.url}/services`,
+    type: "website",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "HelloShiva Digital Marketing Services",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Digital Marketing Services | HelloShiva",
+    description:
+      "Explore HelloShiva's full-funnel digital marketing services: Technical SEO, Local SEO, Performance PPC, Social Media, Content Marketing, and Web Engineering.",
+    images: ["/og-image.jpg"],
+  },
 };
 
 export default function ServicesPage() {
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: siteConfig.url,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Services",
+            item: `${siteConfig.url}/services`,
+          },
+        ],
+      },
+      {
+        "@type": "ItemList",
+        name: "HelloShiva Agency Services",
+        itemListElement: siteConfig.services.map((svc, idx) => ({
+          "@type": "ListItem",
+          position: idx + 1,
+          name: svc.title,
+          url: `${siteConfig.url}/services/${svc.slug}`,
+        })),
+      },
+    ],
+  };
+
   return (
     <div className="pt-28 pb-20 bg-light-section">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       {/* Header Banner */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
         <div className="max-w-3xl mx-auto text-center space-y-4">
@@ -48,93 +110,66 @@ export default function ServicesPage() {
                 {svc.title}
               </h2>
 
-              <p className="text-sm text-[#626985] leading-relaxed">
+              <p className="text-base text-[#626985] leading-relaxed">
                 {svc.shortDesc}
               </p>
 
-              {/* Problems Solved */}
-              <div className="space-y-2 pt-2">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[#10183A]">
-                  Primary Bottlenecks Resolved:
-                </h4>
-                <ul className="space-y-1.5">
-                  {svc.problemsSolved.map((p, pIdx) => (
-                    <li key={pIdx} className="flex items-start gap-2.5 text-xs text-[#626985]">
-                      <span className="w-1.5 h-1.5 rounded-full bg-red-400 shrink-0 mt-1.5" />
-                      <span>{p}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* What's included */}
-              <div className="space-y-2 pt-2">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-[#10183A]">
-                  Key Deliverables:
-                </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {svc.whatsIncluded.slice(0, 4).map((inc, iIdx) => (
-                    <div key={iIdx} className="flex items-start gap-2 text-xs text-[#10183A]">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#22C55E] shrink-0 mt-0.5" />
-                      <span>{inc}</span>
+              <div className="space-y-3 pt-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#10183A]">
+                  Core Deliverables:
+                </span>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  {svc.whatsIncluded.slice(0, 4).map((inc, i) => (
+                    <div key={i} className="flex items-center gap-2 text-xs text-[#626985]">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#6366F1] flex-shrink-0" />
+                      <span className="truncate">{inc}</span>
                     </div>
                   ))}
                 </div>
               </div>
 
-              <div className="pt-4 flex flex-wrap items-center gap-4">
+              <div className="pt-4 flex items-center gap-4">
                 <Link
                   href={`/services/${svc.slug}`}
-                  className="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-semibold text-white bg-gradient-to-r from-[#6366F1] to-[#8067FF] hover:from-[#5558E6] hover:to-[#7358F5] shadow-md shadow-indigo-500/20 transition-all"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#6366F1] hover:bg-[#8067FF] text-white text-xs font-bold shadow-md shadow-indigo-500/20 transition-all duration-200"
                 >
-                  <span>View Full Details & FAQs</span>
+                  <span>Explore {svc.title}</span>
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
-
-                {svc.relatedTools.map((t, tIdx) => (
+                {svc.relatedTools && svc.relatedTools.length > 0 && (
                   <Link
-                    key={tIdx}
-                    href={t.href}
-                    className="text-xs font-semibold text-[#626985] hover:text-[#6366F1] transition-colors bg-[#F5F4FF] border border-[#E8E7FF] px-3 py-2 rounded-xl"
+                    href={svc.relatedTools[0].href}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#626985] hover:text-[#6366F1] transition-colors"
                   >
-                    Try Free: {t.name} ↗
+                    <span>Try free tool</span>
+                    <ArrowRight className="w-3 h-3" />
                   </Link>
-                ))}
+                )}
               </div>
             </div>
 
-            {/* Right Card: Ideal Fit */}
-            <div className="lg:col-span-5 bg-[#F5F4FF] rounded-2xl p-6 border border-[#E8E7FF] space-y-4">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-[#10183A]">
-                Who This Service Is Designed For:
-              </h4>
-              <ul className="space-y-2">
-                {svc.suitableFor.map((suit, sIdx) => (
-                  <li key={sIdx} className="flex items-start gap-2.5 text-xs text-[#626985]">
-                    <div className="w-1.5 h-1.5 rounded-full bg-[#6366F1] shrink-0 mt-1.5" />
-                    <span>{suit}</span>
+            <div className="lg:col-span-5 bg-[#F8F9FC] rounded-2xl p-6 sm:p-8 border border-[#EAEBF4] space-y-4">
+              <h3 className="text-sm font-bold uppercase tracking-wider text-[#10183A]">
+                Common Problems Solved
+              </h3>
+              <ul className="space-y-2.5">
+                {svc.problemsSolved.map((prob, i) => (
+                  <li key={i} className="flex items-start gap-2.5 text-xs text-[#626985]">
+                    <span className="text-[#EF4444] font-bold mt-0.5">•</span>
+                    <span>{prob}</span>
                   </li>
                 ))}
               </ul>
-              <div className="pt-4 border-t border-[#E8E7FF] text-center">
-                <Link
-                  href={`/contact?service=${svc.slug}`}
-                  className="w-full inline-block py-2.5 px-4 rounded-xl text-xs font-semibold text-[#6366F1] bg-white border border-[#E6E7F0] hover:bg-[#E8E7FF] transition-colors"
-                >
-                  Request Consultation on {svc.title}
-                </Link>
-              </div>
             </div>
           </div>
         ))}
       </div>
 
-      {/* Inquiry Form Section */}
+      {/* Embedded Lead Capture */}
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <EnquiryForm
-          headline="Ready to Accelerate Your Digital Growth?"
-          subheadline="Select the service that fits your immediate priorities or request a holistic digital growth roadmap."
-          sourcePage="/services"
+          headline="Ready to Architect a Scalable Growth Engine?"
+          subheadline="Select your target objectives below. Our growth architects will analyze your competitive footprint and schedule a consultation."
         />
       </div>
     </div>

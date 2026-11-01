@@ -49,12 +49,21 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
       url: `https://helloshiva.com/blog/${slug}`,
       publishedTime: article.published_at || article.created_at,
       authors: [article.author || "HelloShiva Strategic Engineering"],
+      images: [
+        {
+          url: "/og-image.jpg",
+          width: 1200,
+          height: 630,
+          alt: title,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title,
       description,
       creator: "@helloshiva",
+      images: ["/og-image.jpg"],
     },
   };
 }
@@ -82,29 +91,58 @@ export default async function BlogPostPage({ params }: PageProps) {
   // Structured Data (JSON-LD)
   const jsonLd = {
     "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: article.title,
-    description: article.meta_description,
-    author: {
-      "@type": "Organization",
-      name: "HelloShiva Digital Marketing Agency",
-      url: "https://helloshiva.com",
-    },
-    publisher: {
-      "@type": "Organization",
-      name: "HelloShiva",
-      url: "https://helloshiva.com",
-      logo: {
-        "@type": "ImageObject",
-        url: "https://helloshiva.com/favicon.ico",
+    "@graph": [
+      {
+        "@type": "BlogPosting",
+        "@id": `${articleUrl}/#article`,
+        headline: article.title,
+        description: article.meta_description,
+        image: "https://helloshiva.com/og-image.jpg",
+        author: {
+          "@type": "Organization",
+          name: "HelloShiva Digital Marketing Agency",
+          url: "https://helloshiva.com",
+        },
+        publisher: {
+          "@type": "Organization",
+          name: "HelloShiva",
+          url: "https://helloshiva.com",
+          logo: {
+            "@type": "ImageObject",
+            url: "https://helloshiva.com/logo.png",
+          },
+        },
+        datePublished: article.published_at || article.created_at,
+        dateModified: article.updated_at || article.created_at,
+        mainEntityOfPage: {
+          "@type": "WebPage",
+          "@id": articleUrl,
+        },
       },
-    },
-    datePublished: article.published_at || article.created_at,
-    dateModified: article.updated_at || article.created_at,
-    mainEntityOfPage: {
-      "@type": "WebPage",
-      "@id": articleUrl,
-    },
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: "https://helloshiva.com",
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Insights & Guides",
+            item: "https://helloshiva.com/blog",
+          },
+          {
+            "@type": "ListItem",
+            position: 3,
+            name: article.title,
+            item: articleUrl,
+          },
+        ],
+      },
+    ],
   };
 
   return (

@@ -2,8 +2,11 @@ import React from "react";
 import { siteConfig } from "@/config/site";
 
 export const metadata = {
-  title: "Privacy Policy",
+  title: "Privacy Policy | HelloShiva",
   description: "Privacy policy and data governance practices at HelloShiva Digital Agency.",
+  alternates: {
+    canonical: `${siteConfig.url}/privacy-policy`,
+  },
 };
 
 export default function PrivacyPolicyPage() {

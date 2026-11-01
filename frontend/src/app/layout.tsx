@@ -14,16 +14,18 @@ const inter = Inter({
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
   title: {
-    default: `${siteConfig.name} — Digital Marketing Agency | SEO, Ads & Web Engineering`,
+    default: "HelloShiva | Digital Marketing, SEO & Growth Agency",
     template: `%s | ${siteConfig.name}`,
   },
-  description: siteConfig.subheadline,
+  description:
+    "Grow your online presence with HelloShiva. Explore SEO, digital marketing, social media, PPC and website solutions designed to help businesses grow.",
   keywords: [
     "digital marketing agency",
     "SEO services",
     "technical SEO",
     "local SEO",
     "performance marketing",
+    "PPC management",
     "content marketing",
     "web design and development",
     "digital marketing tools",
@@ -32,6 +34,18 @@ export const metadata: Metadata = {
   ],
   authors: [{ name: siteConfig.name, url: siteConfig.url }],
   creator: siteConfig.name,
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/icon.png", type: "image/png", sizes: "192x192" },
+      { url: "/icon-512.png", type: "image/png", sizes: "512x512" },
+    ],
+    shortcut: "/favicon.ico",
+    apple: [
+      { url: "/apple-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+  },
+  manifest: "/site.webmanifest",
   alternates: {
     canonical: siteConfig.url,
   },
@@ -39,16 +53,27 @@ export const metadata: Metadata = {
     type: "website",
     locale: "en_US",
     url: siteConfig.url,
-    title: `${siteConfig.name} — Digital Marketing Agency`,
-    description: siteConfig.subheadline,
+    title: "HelloShiva | Digital Marketing, SEO & Growth Agency",
+    description:
+      "Grow your online presence with HelloShiva. Explore SEO, digital marketing, social media, PPC and website solutions designed to help businesses grow.",
     siteName: siteConfig.name,
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "HelloShiva | Digital Marketing, SEO & Growth Agency",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
-    title: `${siteConfig.name} — Digital Marketing Agency`,
-    description: siteConfig.subheadline,
+    title: "HelloShiva | Digital Marketing, SEO & Growth Agency",
+    description:
+      "Grow your online presence with HelloShiva. Explore SEO, digital marketing, social media, PPC and website solutions designed to help businesses grow.",
     creator: "@helloshiva",
     site: "@helloshiva",
+    images: ["/og-image.jpg"],
   },
   robots: {
     index: true,
@@ -77,7 +102,8 @@ export default function RootLayout({
         name: siteConfig.name,
         legalName: siteConfig.legalName,
         url: siteConfig.url,
-        logo: `${siteConfig.url}/favicon.ico`,
+        logo: `${siteConfig.url}/logo.png`,
+        image: `${siteConfig.url}/og-image.jpg`,
         description: siteConfig.subheadline,
         telephone: siteConfig.contact.phone,
         email: siteConfig.contact.email,

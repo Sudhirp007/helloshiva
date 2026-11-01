@@ -2,8 +2,11 @@ import React from "react";
 import { siteConfig } from "@/config/site";
 
 export const metadata = {
-  title: "Terms and Conditions",
+  title: "Terms and Conditions | HelloShiva",
   description: "Terms of service and usage conditions for HelloShiva Agency and free tools.",
+  alternates: {
+    canonical: `${siteConfig.url}/terms`,
+  },
 };
 
 export default function TermsPage() {

@@ -11,6 +11,26 @@ const nextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      {
+        source: '/:path*',
+        has: [{ type: 'host', value: 'www.helloshiva.com' }],
+        destination: 'https://helloshiva.com/:path*',
+        permanent: true,
+      },
+      {
+        source: '/services/website-design-development',
+        destination: '/services/web-design-development',
+        permanent: true,
+      },
+      {
+        source: '/services/website-design-development/:path*',
+        destination: '/services/web-design-development',
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
@@ -39,6 +59,15 @@ const nextConfig = {
           {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=(), browsing-topics=()',
+          },
+        ],
+      },
+      {
+        source: '/(favicon.ico|icon.png|apple-icon.png|logo.png|og-image.jpg)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=86400, stale-while-revalidate=604800',
           },
         ],
       },

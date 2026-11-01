@@ -4,16 +4,79 @@ import { siteConfig } from "@/config/site";
 import { Sparkles, ArrowRight, ShieldCheck, Zap } from "lucide-react";
 
 export const metadata = {
-  title: "10 Free Marketing & SEO Tools",
+  title: "10 Free Marketing & SEO Diagnostic Tools",
   description:
     "Free, fast, search-friendly marketing tools by HelloShiva: SEO page analyzer, SERP previewer, keyword density checker, robots.txt tester, and more. No login required.",
+  alternates: {
+    canonical: `${siteConfig.url}/tools`,
+  },
+  openGraph: {
+    title: "10 Free Marketing & SEO Diagnostic Tools | HelloShiva",
+    description:
+      "Free, fast, search-friendly marketing tools by HelloShiva: SEO page analyzer, SERP previewer, keyword density checker, robots.txt tester, and more. No login required.",
+    url: `${siteConfig.url}/tools`,
+    type: "website",
+    images: [
+      {
+        url: "/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "HelloShiva Free Marketing Tools",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "10 Free Marketing & SEO Diagnostic Tools | HelloShiva",
+    description:
+      "Free, fast, search-friendly marketing tools by HelloShiva: SEO page analyzer, SERP previewer, keyword density checker, robots.txt tester, and more. No login required.",
+    images: ["/og-image.jpg"],
+  },
 };
 
 export default function ToolsDirectoryPage() {
   const categories = Array.from(new Set(siteConfig.tools.map((t) => t.category)));
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "BreadcrumbList",
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Home",
+            item: siteConfig.url,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: "Tools",
+            item: `${siteConfig.url}/tools`,
+          },
+        ],
+      },
+      {
+        "@type": "ItemList",
+        name: "Free SEO & Marketing Tools",
+        itemListElement: siteConfig.tools.map((tool, idx) => ({
+          "@type": "ListItem",
+          position: idx + 1,
+          name: tool.name,
+          description: tool.description,
+          url: `${siteConfig.url}/tools/${tool.slug}`,
+        })),
+      },
+    ],
+  };
+
   return (
     <div className="pt-28 pb-20 bg-light-section">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
         <div className="max-w-3xl mx-auto text-center space-y-4">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-[#E8E7FF] text-[#6366F1]">
@@ -48,63 +111,39 @@ export default function ToolsDirectoryPage() {
                     className="bg-white rounded-2xl border border-[#E6E7F0] p-6 shadow-sm hover:border-[#6366F1]/50 hover:shadow-xl hover:shadow-indigo-500/5 transition-all duration-300 flex flex-col justify-between group"
                   >
                     <div>
-                      <div className="flex items-center justify-between mb-3">
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-[#6366F1] bg-[#F5F4FF] px-2.5 py-0.5 rounded-md border border-[#E8E7FF]">
-                          {tool.isClientSide ? "Instant Browser" : "Server Verified"}
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-[11px] font-bold uppercase tracking-wider text-[#6366F1] bg-[#E8E7FF] px-2.5 py-1 rounded-md">
+                          {tool.category}
                         </span>
-                        {tool.badge && (
-                          <span className="text-[10px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#E8E7FF] text-[#8067FF]">
-                            {tool.badge}
+                        {tool.isClientSide && (
+                          <span className="text-[10px] font-semibold text-[#10B981] bg-emerald-50 px-2 py-0.5 rounded border border-emerald-100 flex items-center gap-1">
+                            <Zap className="w-2.5 h-2.5" /> Instant
                           </span>
                         )}
                       </div>
 
-                      <h3 className="text-base font-bold text-[#10183A] mb-2 group-hover:text-[#6366F1] transition-colors">
+                      <h3 className="text-lg font-bold text-[#10183A] mb-2 group-hover:text-[#6366F1] transition-colors">
                         {tool.name}
                       </h3>
 
-                      <p className="text-xs text-[#626985] leading-relaxed mb-6">
+                      <p className="text-xs sm:text-sm text-[#626985] leading-relaxed mb-6">
                         {tool.description}
                       </p>
                     </div>
 
-                    <div className="pt-4 border-t border-[#E6E7F0] flex items-center justify-between text-xs font-semibold">
-                      <Link
-                        href={`/tools/${tool.slug}`}
-                        className="text-[#6366F1] group-hover:text-[#8067FF] flex items-center gap-1.5 transition-colors"
-                      >
-                        <span>{tool.ctaText}</span>
-                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
-                      </Link>
-                    </div>
+                    <Link
+                      href={`/tools/${tool.slug}`}
+                      className="inline-flex items-center justify-between w-full px-4 py-2.5 rounded-xl bg-[#F8F9FC] group-hover:bg-[#6366F1] text-xs font-bold text-[#10183A] group-hover:text-white transition-all duration-200"
+                    >
+                      <span>Launch Tool</span>
+                      <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                    </Link>
                   </div>
                 ))}
               </div>
             </div>
           );
         })}
-
-        {/* Agency Lead Banner */}
-        <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-[#0B1025] to-[#171F42] text-white border border-[#252B49] shadow-2xl flex flex-col lg:flex-row items-center justify-between gap-8">
-          <div className="space-y-3 text-center lg:text-left max-w-2xl">
-            <span className="text-xs font-semibold text-[#8067FF] uppercase tracking-wider">
-              Need End-to-End Growth Execution?
-            </span>
-            <h3 className="text-2xl sm:text-3xl font-extrabold">
-              Free tools diagnose problems. HelloShiva solves them.
-            </h3>
-            <p className="text-sm text-[#C6C9DC] leading-relaxed">
-              If our free tools helped you identify broken tags, slow headers, or crawl disallows, let our agency specialists perform a complete technical and commercial audit of your domain.
-            </p>
-          </div>
-          <Link
-            href="/contact"
-            className="shrink-0 inline-flex items-center gap-2 px-8 py-4 rounded-xl text-sm font-semibold text-white bg-gradient-to-r from-[#6366F1] to-[#8067FF] hover:from-[#5558E6] hover:to-[#7358F5] shadow-lg shadow-indigo-500/25 transition-all"
-          >
-            <span>Book Professional Consultation</span>
-            <ArrowRight className="w-4 h-4" />
-          </Link>
-        </div>
       </div>
     </div>
   );
