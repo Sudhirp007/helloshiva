@@ -1,0 +1,12 @@
+{
+  "keys": [
+    {
+      "kty": "RSA",
+      "use": "sig",
+      "alg": "RS256",
+      "kid": "helloshiva-agent-2026",
+      "n": "v1X9...helloshiva-bot-auth...",
+      "e": "AQAB"
+    }
+  ]
+}

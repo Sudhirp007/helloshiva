@@ -1,0 +1,19 @@
+{
+  "protocol": {
+    "name": "acp",
+    "version": "2024-09"
+  },
+  "api_base_url": "https://helloshiva.com/api/v1",
+  "transports": [
+    "http",
+    "json-rpc"
+  ],
+  "capabilities": {
+    "services": [
+      "digital-marketing-consulting",
+      "seo-audit",
+      "performance-marketing",
+      "content-intelligence"
+    ]
+  }
+}

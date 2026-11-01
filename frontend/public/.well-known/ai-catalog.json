@@ -1,0 +1,18 @@
+{
+  "name": "HelloShiva AI Catalog",
+  "description": "Machine-readable catalog of HelloShiva APIs, services, and agent capabilities",
+  "url": "https://helloshiva.com",
+  "version": "1.0.0",
+  "apis": [
+    {
+      "name": "Content Intelligence Drafting API",
+      "endpoint": "https://helloshiva.com/api/v1/content-intelligence/draft",
+      "method": "POST"
+    },
+    {
+      "name": "SEO Analyzer API",
+      "endpoint": "https://helloshiva.com/api/v1/tools/seo-analyzer",
+      "method": "POST"
+    }
+  ]
+}

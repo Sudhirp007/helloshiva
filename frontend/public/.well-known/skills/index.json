@@ -1,0 +1,19 @@
+{
+  "skills": [
+    {
+      "name": "seo-page-analyzer",
+      "description": "Technical SEO page analyzer for titles, meta descriptions, and heading structure",
+      "url": "https://helloshiva.com/tools/seo-page-analyzer"
+    },
+    {
+      "name": "serp-preview",
+      "description": "Google Search result snippet preview and character counter",
+      "url": "https://helloshiva.com/tools/serp-preview"
+    },
+    {
+      "name": "content-intelligence-draft",
+      "description": "Generate full-funnel marketing drafts with real-time editorial relevance scoring",
+      "url": "https://helloshiva.com/api/v1/content-intelligence/draft"
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "name": "HelloShiva Agent",
+  "description": "Autonomous AI Agent for Digital Marketing, SEO Intelligence, and Growth Consulting",
+  "url": "https://helloshiva.com",
+  "version": "1.0.0",
+  "provider": {
+    "name": "HelloShiva Digital Agency",
+    "url": "https://helloshiva.com"
+  },
+  "capabilities": {
+    "streaming": true,
+    "pushNotifications": false
+  },
+  "skills": [
+    {
+      "name": "seo-page-analyzer",
+      "description": "Inspects on-page SEO signals and metadata",
+      "url": "https://helloshiva.com/tools/seo-page-analyzer"
+    },
+    {
+      "name": "content-intelligence",
+      "description": "Generates intent-aligned SEO content drafts",
+      "url": "https://helloshiva.com/api/v1/content-intelligence/draft"
+    }
+  ],
+  "extensions": [
+    {
+      "uri": "https://github.com/google-agentic-commerce/AP2/tree/v0.1.0",
+      "required": true,
+      "params": {
+        "roles": [
+          "merchant"
+        ]
+      }
+    }
+  ]
+}

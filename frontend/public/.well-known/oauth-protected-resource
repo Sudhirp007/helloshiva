@@ -1,0 +1,16 @@
+{
+  "resource": "https://helloshiva.com",
+  "authorization_servers": [
+    "https://helloshiva.com"
+  ],
+  "scopes_supported": [
+    "read:marketing",
+    "write:enquiries",
+    "read:tools",
+    "read:content"
+  ],
+  "bearer_methods_supported": [
+    "header"
+  ],
+  "resource_documentation": "https://helloshiva.com/auth.md"
+}

@@ -1,0 +1,55 @@
+[
+  {
+    "$schema": "https://modelcontextprotocol.io/schema/server-card.json",
+    "server": {
+      "name": "helloshiva-mcp",
+      "description": "HelloShiva AI-Powered Digital Marketing & Content Intelligence Model Context Protocol Server",
+      "version": "1.0.0",
+      "capabilities": {
+        "tools": true,
+        "prompts": true,
+        "resources": true
+      }
+    },
+    "transport": {
+      "type": "sse",
+      "url": "https://helloshiva.com/api/v1/mcp"
+    },
+    "tools": [
+      {
+        "name": "analyze_seo_page",
+        "description": "Audits on-page SEO tags, headings, canonicals, and OpenGraph metadata",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "url"
+          ]
+        }
+      },
+      {
+        "name": "generate_content_draft",
+        "description": "Synthesizes intent-aligned full-funnel marketing articles",
+        "parameters": {
+          "type": "object",
+          "properties": {
+            "title": {
+              "type": "string"
+            },
+            "primaryKeyword": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "title",
+            "primaryKeyword"
+          ]
+        }
+      }
+    ]
+  }
+]

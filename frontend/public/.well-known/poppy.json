@@ -1,0 +1,5 @@
+{
+  "protocol": "personal-agent-protocol",
+  "version": "1.0",
+  "endpoint": "https://helloshiva.com/api/v1"
+}

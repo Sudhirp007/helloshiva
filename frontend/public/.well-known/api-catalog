@@ -1,0 +1,25 @@
+{
+  "linkset": [
+    {
+      "anchor": "https://helloshiva.com/api/v1",
+      "service-desc": [
+        {
+          "href": "https://helloshiva.com/openapi.json",
+          "type": "application/vnd.oai.openapi+json"
+        }
+      ],
+      "service-doc": [
+        {
+          "href": "https://helloshiva.com/auth.md",
+          "type": "text/markdown"
+        }
+      ],
+      "status": [
+        {
+          "href": "https://helloshiva.com/api/v1/content-intelligence/draft",
+          "type": "application/json"
+        }
+      ]
+    }
+  ]
+}

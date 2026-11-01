@@ -1,0 +1,37 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "HelloShiva API",
+    "description": "AI-Powered Digital Marketing & Content Intelligence API",
+    "version": "1.0.0"
+  },
+  "servers": [
+    {
+      "url": "https://helloshiva.com/api/v1"
+    }
+  ],
+  "paths": {
+    "/content-intelligence/draft": {
+      "post": {
+        "summary": "Generate AI Marketing Draft",
+        "operationId": "generateDraft",
+        "responses": {
+          "200": {
+            "description": "Draft generated successfully"
+          }
+        }
+      }
+    },
+    "/tools/seo-analyzer": {
+      "post": {
+        "summary": "Analyze Webpage SEO Signals",
+        "operationId": "analyzeSeo",
+        "responses": {
+          "200": {
+            "description": "SEO audit analysis"
+          }
+        }
+      }
+    }
+  }
+}

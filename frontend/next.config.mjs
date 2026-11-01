@@ -20,6 +20,26 @@ const nextConfig = {
         permanent: true,
       },
       {
+        source: '/wp-content/uploads/2017/01/cropped-logo_seosight-1-230x230.png',
+        destination: '/icon-512.png',
+        permanent: true,
+      },
+      {
+        source: '/wp-content/:path*',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        source: '/wp-admin/:path*',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        source: '/feed/:path*',
+        destination: '/',
+        permanent: true,
+      },
+      {
         source: '/services/website-design-development',
         destination: '/services/web-design-development',
         permanent: true,
@@ -33,6 +53,41 @@ const nextConfig = {
   },
   async headers() {
     return [
+      {
+        source: '/.well-known/api-catalog',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'application/linkset+json',
+          },
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+        ],
+      },
+      {
+        source: '/auth.md',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'text/markdown; charset=utf-8',
+          },
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+        ],
+      },
+      {
+        source: '/.well-known/:path*',
+        headers: [
+          {
+            key: 'Access-Control-Allow-Origin',
+            value: '*',
+          },
+        ],
+      },
       {
         source: '/:path*',
         headers: [

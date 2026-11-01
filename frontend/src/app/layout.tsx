@@ -101,6 +101,7 @@ export default function RootLayout({
         "@id": `${siteConfig.url}/#organization`,
         name: siteConfig.name,
         legalName: siteConfig.legalName,
+        alternateName: ["Hello Shiva", "Hello Shiva Data Lab", "HelloShiva Agency"],
         url: siteConfig.url,
         logo: `${siteConfig.url}/logo.png`,
         image: `${siteConfig.url}/og-image.jpg`,
@@ -148,6 +149,26 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <head>
+        <link rel="ai-catalog" href="/.well-known/ai-catalog.json" />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              if (typeof window !== 'undefined' && 'modelContext' in navigator && typeof navigator.modelContext.registerTool === 'function') {
+                try {
+                  navigator.modelContext.registerTool({
+                    name: 'getMarketingServices',
+                    description: 'Get list of SEO and performance marketing services from HelloShiva',
+                    parameters: { type: 'object', properties: {} },
+                    handler: async () => {
+                      const res = await fetch('/api/v1/content-intelligence/draft');
+                      return await res.json();
+                    }
+                  });
+                } catch(e) { console.debug('WebMCP init', e); }
+              }
+            `,
+          }}
+        />
         {/* Google Tag Manager & DataLayer */}
         <script
           dangerouslySetInnerHTML={{
