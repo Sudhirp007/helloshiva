@@ -49,6 +49,132 @@ const nextConfig = {
         destination: '/services/web-design-development',
         permanent: true,
       },
+      // Legacy WordPress URLs identified from Google Search Console Top Pages
+      {
+        source: '/social-media-marketing/:path*',
+        destination: '/services/social-media-marketing',
+        permanent: true,
+      },
+      {
+        source: '/social-media-marketing',
+        destination: '/services/social-media-marketing',
+        permanent: true,
+      },
+      {
+        source: '/email-marketing/:path*',
+        destination: '/services/content-marketing',
+        permanent: true,
+      },
+      {
+        source: '/email-marketing',
+        destination: '/services/content-marketing',
+        permanent: true,
+      },
+      {
+        source: '/category/email-marketing/:path*',
+        destination: '/services/content-marketing',
+        permanent: true,
+      },
+      {
+        source: '/category/:path*',
+        destination: '/blog',
+        permanent: true,
+      },
+      {
+        source: '/seo-analysis/:path*',
+        destination: '/services/seo-services',
+        permanent: true,
+      },
+      {
+        source: '/seo-analysis',
+        destination: '/services/seo-services',
+        permanent: true,
+      },
+      {
+        source: '/our-clients/:path*',
+        destination: '/portfolio',
+        permanent: true,
+      },
+      {
+        source: '/our-clients',
+        destination: '/portfolio',
+        permanent: true,
+      },
+      {
+        source: '/contact-information/:path*',
+        destination: '/contact',
+        permanent: true,
+      },
+      {
+        source: '/contact-information',
+        destination: '/contact',
+        permanent: true,
+      },
+      {
+        source: '/portfolio/smm/:path*',
+        destination: '/services/social-media-marketing',
+        permanent: true,
+      },
+      {
+        source: '/portfolio/smm',
+        destination: '/services/social-media-marketing',
+        permanent: true,
+      },
+      {
+        source: '/portfolio/:path*',
+        destination: '/portfolio',
+        permanent: true,
+      },
+      {
+        source: '/product/:path*',
+        destination: '/services',
+        permanent: true,
+      },
+      {
+        source: '/product-tag/:path*',
+        destination: '/services',
+        permanent: true,
+      },
+      {
+        source: '/shop/:path*',
+        destination: '/services',
+        permanent: true,
+      },
+      {
+        source: '/shop',
+        destination: '/services',
+        permanent: true,
+      },
+      {
+        source: '/cart/:path*',
+        destination: '/services',
+        permanent: true,
+      },
+      {
+        source: '/cart',
+        destination: '/services',
+        permanent: true,
+      },
+      {
+        source: '/checkout/:path*',
+        destination: '/services',
+        permanent: true,
+      },
+      {
+        source: '/checkout',
+        destination: '/services',
+        permanent: true,
+      },
+      {
+        source: '/typography/:path*',
+        destination: '/',
+        permanent: true,
+      },
+      {
+        source: '/buttons/:path*',
+        destination: '/',
+        permanent: true,
+      },
     ];
   },
   async headers() {
