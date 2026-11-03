@@ -1,4 +1,5 @@
 # Security & Credentials (CRITICAL: Never commit keys or secrets)
+.secrets/
 *.key
 *.pub
 secret/
